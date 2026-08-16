@@ -1,4 +1,8 @@
 {
+  "0.12.0": {
+    "en": "Create alarm is now a button on the room device itself. As a maintenance action it was invisible in the Homey web app.",
+    "no": "Opprett alarm er nå en knapp på selve rom-enheten. Som vedlikeholdshandling var den usynlig i Homeys nettapp."
+  },
   "0.11.1": {
     "en": "Room device settings now say plainly that saving only stores the values, and that the alarm is created by the Create alarm button.",
     "no": "Enhetsinnstillingene for rom sier nå tydelig at lagring bare lagrer verdiene, og at alarmen opprettes med knappen Opprett alarm."
