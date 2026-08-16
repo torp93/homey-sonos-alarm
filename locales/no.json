@@ -8,9 +8,11 @@
     "unknownSource": "Fant ingen lyd med det navnet. Gyldige:",
     "unknownAlarm": "Fant ingen alarm med ID",
     "badTime": "Ikke et gyldig tidspunkt — bruk formen 07:00:",
+    "badVolume": "Ikke et gyldig volum.",
     "noDays": "Velg minst én dag.",
     "noRooms": "Fant ingen rom å legge alarmen i.",
     "noSourceList": "Kunne ikke hente lista over lyder.",
+    "deleteFailed": "Kunne ikke slette alarmen:",
     "partial": "Noen alarmer kunne ikke endres. Feilet:"
   },
   "source": {

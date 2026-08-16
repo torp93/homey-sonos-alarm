@@ -22,7 +22,7 @@ class AlarmDriver extends Homey.Driver {
     });
 
     session.setHandler('saveHost', async ({ host }) => {
-      if (!isValidHost(host)) throw new Error('Adressen ser ikke gyldig ut.');
+      if (!isValidHost(host)) throw new Error(this.homey.__('error.badAddress'));
       await this.homey.settings.set(SETTING_HOST, String(host).trim());
       return this.homey.app.testSpeaker(host);
     });

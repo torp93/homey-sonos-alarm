@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -11,8 +11,8 @@
     "no": "Sonos-alarmer"
   },
   "description": {
-    "en": "Control the alarms on your Sonos speakers from flows.",
-    "no": "Styr alarmene på Sonos-høyttalerne dine fra flows."
+    "en": "Every Sonos speaker becomes an alarm clock you can automate.",
+    "no": "Hver Sonos-høyttaler blir en vekkerklokke du kan automatisere."
   },
   "category": [
     "music"
@@ -772,82 +772,30 @@
               "value": "07:00"
             },
             {
+              "id": "availableSources",
+              "type": "label",
+              "label": {
+                "en": "Your sounds",
+                "no": "Dine lyder"
+              },
+              "hint": {
+                "en": "Filled in from your own Sonos favourites and playlists. Copy a name into the field below.",
+                "no": "Fylles inn fra dine egne Sonos-favoritter og spillelister. Kopier et navn inn i feltet under."
+              },
+              "value": ""
+            },
+            {
               "id": "newSource",
-              "type": "dropdown",
+              "type": "text",
               "label": {
                 "en": "Sound",
                 "no": "Lyd"
               },
               "hint": {
-                "en": "The built-in chime, or the name of a Sonos favourite such as a radio station. Leave as Sonos-tone for the built-in sound. A wrong name is reported with the full list of valid ones.",
-                "no": "Den innebygde tonen, eller navnet på en Sonos-favoritt som en radiostasjon. La den stå som Sonos-tone for den innebygde lyden. Et navn som ikke treffer rapporteres med hele lista over gyldige."
+                "en": "The built-in chime, or the name of one of your Sonos favourites or playlists as listed above. A name that does not match is reported with the full list.",
+                "no": "Den innebygde tonen, eller navnet på en av dine Sonos-favoritter eller spillelister slik de står listet over. Et navn som ikke treffer rapporteres med hele lista."
               },
-              "value": "Sonos-tone",
-              "values": [
-                {
-                  "id": "Sonos-tone",
-                  "label": {
-                    "en": "Sonos-tone",
-                    "no": "Sonos-tone"
-                  }
-                },
-                {
-                  "id": "NRJ Norway",
-                  "label": {
-                    "en": "NRJ Norway (radio)",
-                    "no": "NRJ Norway (radio)"
-                  }
-                },
-                {
-                  "id": "NRK mP3",
-                  "label": {
-                    "en": "NRK mP3 (radio)",
-                    "no": "NRK mP3 (radio)"
-                  }
-                },
-                {
-                  "id": "P4 Lyden av Norge",
-                  "label": {
-                    "en": "P4 Lyden av Norge (radio)",
-                    "no": "P4 Lyden av Norge (radio)"
-                  }
-                },
-                {
-                  "id": "P5 Hits",
-                  "label": {
-                    "en": "P5 Hits (radio)",
-                    "no": "P5 Hits (radio)"
-                  }
-                },
-                {
-                  "id": "P7 Klem",
-                  "label": {
-                    "en": "P7 Klem (radio)",
-                    "no": "P7 Klem (radio)"
-                  }
-                },
-                {
-                  "id": "Radio Norge",
-                  "label": {
-                    "en": "Radio Norge (radio)",
-                    "no": "Radio Norge (radio)"
-                  }
-                },
-                {
-                  "id": "Starred",
-                  "label": {
-                    "en": "Starred (Spotify)",
-                    "no": "Starred (Spotify)"
-                  }
-                },
-                {
-                  "id": "FTS",
-                  "label": {
-                    "en": "FTS (Sonos-spilleliste)",
-                    "no": "FTS (Sonos-spilleliste)"
-                  }
-                }
-              ]
+              "value": "Sonos chime"
             },
             {
               "id": "applyOnSave",

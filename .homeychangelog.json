@@ -1,4 +1,8 @@
 {
+  "0.17.0": {
+    "en": "The sound field on a room device is now filled from your own Sonos favourites instead of a fixed list, error messages are in English, and driver images tell the two device types apart.",
+    "no": "Lydfeltet på en rom-enhet fylles nå fra dine egne Sonos-favoritter i stedet for en fast liste, feilmeldinger er på engelsk, og driverbildene skiller de to enhetstypene."
+  },
   "0.16.0": {
     "en": "Room device settings have a quick pick for every day, weekdays and weekends, so the seven day fields do not have to be set one by one.",
     "no": "Enhetsinnstillingene for rom har et hurtigvalg for hver dag, ukedager og helg, så de sju dagsfeltene ikke må settes ett for ett."

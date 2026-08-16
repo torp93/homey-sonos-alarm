@@ -8,9 +8,11 @@
     "unknownSource": "No sound by that name. Valid ones:",
     "unknownAlarm": "No alarm found with ID",
     "badTime": "Not a valid time — use the form 07:00:",
+    "badVolume": "Not a valid volume.",
     "noDays": "Pick at least one day.",
     "noRooms": "No rooms found to put the alarm in.",
     "noSourceList": "Could not fetch the list of sounds.",
+    "deleteFailed": "Could not delete the alarm:",
     "partial": "Some alarms could not be changed. Failed:"
   },
   "source": {

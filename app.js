@@ -195,7 +195,7 @@ class SonosAlarmApp extends Homey.App {
     // En musikk- eller radiokilde kan ikke konstrueres, men favoritten bærer
     // med seg både URI og metadata — vi kopierer dem ordrett.
     const source = findSource(await this.listSources(), sourceId);
-    if (!source) throw new Error(`Ukjent lydkilde: ${sourceId}`);
+    if (!source) throw new Error(`${this.homey.__('error.unknownSource')} ${sourceId}`);
 
     const created = await client.createAlarm({
       startTime,
@@ -415,7 +415,7 @@ class SonosAlarmApp extends Homey.App {
         ].filter((day) => day !== null);
 
         const recurrence = daysToRecurrence(days);
-        if (!recurrence) throw new Error('Velg minst én ukedag.');
+        if (!recurrence) throw new Error(this.homey.__('error.noDays'));
         return device.setRecurrence(recurrence);
       });
 

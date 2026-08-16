@@ -82,12 +82,12 @@ class AlarmDevice extends Homey.Device {
 
   async setTime(time) {
     const normalized = normalizeTime(time);
-    if (!normalized) throw new Error(`Ugyldig tidspunkt: ${time}`);
+    if (!normalized) throw new Error(`${this.homey.__('error.badTime')} ${time}`);
     return this._change({ startTime: normalized });
   }
 
   async setVolume(volume) {
-    if (!Number.isFinite(volume)) throw new Error('Ugyldig volum');
+    if (!Number.isFinite(volume)) throw new Error(this.homey.__('error.badVolume'));
     return this._change({ volume });
   }
 

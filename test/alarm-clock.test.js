@@ -137,7 +137,9 @@ test('serialiserer boolske felt som 1 og 0', () => {
 
 test('validering avviser manglende rom', () => {
   const [alarm] = parseAlarms(LIST_ALARMS_RESPONSE);
-  assert.throws(() => validateAlarm({ ...alarm, roomUUID: '' }), /rom/i);
+  // Meldingene i lib/ er engelske: modulen har ingen tilgang til homey.__(),
+  // og engelsk er obligatorisk i App Store.
+  assert.throws(() => validateAlarm({ ...alarm, roomUUID: '' }), /no room/i);
 });
 
 test('merge beholder felt som ikke endres', () => {
@@ -152,7 +154,7 @@ test('merge beholder felt som ikke endres', () => {
 
 test('merge validerer resultatet, ikke bare endringen', () => {
   const [alarm] = parseAlarms(LIST_ALARMS_RESPONSE);
-  assert.throws(() => mergeAlarm(alarm, { recurrence: 'SOMETIMES' }), /gjentakelse/i);
+  assert.throws(() => mergeAlarm(alarm, { recurrence: 'SOMETIMES' }), /recurrence/i);
 });
 
 test('normalisering skriver tiden om, ikke bare godkjenner den', () => {

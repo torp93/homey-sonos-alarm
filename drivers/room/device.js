@@ -6,7 +6,7 @@ const {
 } = require('../../lib/room-summary');
 const { normalizeTime, findEquivalentAlarm } = require('../../lib/alarm-clock');
 const { daysToRecurrence, daysForPreset } = require('../../lib/recurrence');
-const { findSourceByTitle } = require('../../lib/favorites');
+const { findSourceByTitle, describeSource } = require('../../lib/favorites');
 
 class RoomDevice extends Homey.Device {
   async onInit() {
@@ -31,6 +31,7 @@ class RoomDevice extends Homey.Device {
 
     this.homey.app.refresh().catch((error) => this.error('Første henting feilet', error));
     this._fillMissingSettings().catch((error) => this.error('Kunne ikke fylle standarder', error));
+    this._refreshSourceList().catch((error) => this.error('Kunne ikke liste lydkilder', error));
     this.log(`Rom ${this.roomUUID} initialisert`);
   }
 
@@ -86,16 +87,37 @@ class RoomDevice extends Homey.Device {
     }
 
     if (deleting) {
-      await this._deleteSelection(settings.deletePosition);
-
-      // Sletting og gjenoppretting i samme lagring gjorde slettingen
-      // meningsløs: alarmen ble borte og lagt til igjen i samme trykk. Derfor
-      // slås «Bruk når du lagrer» av her, og opprettelsen hoppes over.
+      // Valget nullstilles FØR slettingen forsøkes, ikke etter. Feilet
+      // slettingen og valget ble stående, ville neste lagring — selv bare en
+      // volumendring — slettet alarmen som da står på den plassen. Sletting
+      // kan ikke angres, så et etterlatt valg er den farligste tilstanden
+      // enheten kan ha.
       await this.setSettings({ deletePosition: 'none', applyOnSave: false }).catch(() => {});
+
+      try {
+        await this._deleteSelection(settings.deletePosition);
+      } catch (error) {
+        this.error('Sletting feilet', error);
+        await this.setWarning(`${this.homey.__('error.deleteFailed')} ${error.message}`)
+          .catch(() => {});
+        return;
+      }
+
+      await this.unsetWarning().catch(() => {});
       return;
     }
 
-    if (settings.applyOnSave !== false) await this._createFromSettings();
+    if (settings.applyOnSave === false) return;
+
+    // Feil fra en lagring skjer etter at Homey har svart «lagret», så uten en
+    // advarsel på enheten ville brukeren sett suksess og ingen alarm.
+    try {
+      await this._createFromSettings();
+      await this.unsetWarning().catch(() => {});
+    } catch (error) {
+      this.error('Kunne ikke bruke innstillingene', error);
+      await this.setWarning(error.message).catch(() => {});
+    }
   }
 
   async _deleteSelection(selection) {
@@ -160,6 +182,18 @@ class RoomDevice extends Homey.Device {
     if (Object.keys(missing).length === 0) return;
     this.log('Fyller inn manglende standardinnstillinger:', Object.keys(missing).join(', '));
     await this.setSettings(missing);
+  }
+
+  // Etiketten fylles ved kjøring, så den viser BRUKERENS egne lyder.
+  // Nedtrekk i enhetsinnstillinger kan ikke fylles slik — derfor er
+  // lydfeltet et tekstfelt med navneoppslag, ikke en fast liste.
+  async _refreshSourceList() {
+    const sources = await this.homey.app.listSources();
+    const language = this.homey.i18n.getLanguage();
+    const names = sources.map((source) => describeSource(source, language)).join('\n');
+    if (this.getSettings().availableSources !== names) {
+      await this.setSettings({ availableSources: names });
+    }
   }
 
   async _createFromSettings() {
