@@ -1,4 +1,8 @@
 {
+  "1.3.1": {
+    "en": "The app and device images are the Sonos wordmark, drawn from vector so they stay sharp at every size.",
+    "no": "App- og enhetsbildene er Sonos-ordmerket, tegnet fra vektor så de holder seg skarpe i alle størrelser."
+  },
   "1.3.0": {
     "en": "The sound picker in the app settings works again, and the sound can now be changed on an alarm that already exists.",
     "no": "Lydvelgeren i appinnstillingene virker igjen, og lyden kan nå endres på en alarm som allerede finnes."
