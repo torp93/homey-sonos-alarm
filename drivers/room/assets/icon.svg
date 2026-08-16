@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Rom-enheten: to overlappende vekkerklokker.
+  Rom-enheten: samme vekkerklokke som alarm-enheten, med vilje identisk.
 
-  Samme motiv som alarm-driveren, etter ønske — men ikke identisk. To
-  driverikoner som er byte for byte like gjør enhetstypene umulige å skille i
-  legg-til-lista, og det var et funn i gjennomgangen mot App Store-kravene.
-  Én klokke er én alarm; to er rommet som holder flere.
+  Gjennomgangen mot App Store-kravene flagget identiske driverbilder, siden de
+  to enhetstypene da ikke lar seg skille i legg-til-lista. Valget er tatt likevel:
+  appflisen bærer Sonos-ordmerket og skiller seg tydelig, og begge enhetene
+  handler om alarmer. Navnet skiller dem.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
   <g fill="#000000">
-    <!-- Bakre klokke, forskjøvet opp til venstre -->
-    <path d="M44 26a30 30 0 0 0-24 47l11-11a16 16 0 0 1 24-22l11-11a30 30 0 0 0-22-3z" opacity=".55"/>
-    <path d="M96 52a70 70 0 1 0-70 70 70 70 0 0 0 70-70zm-70 50a50 50 0 1 1 0-100 50 50 0 0 1 0 100z" opacity=".55" transform="translate(18 8)"/>
-
-    <!-- Fremre klokke -->
-    <path d="M96 96a34 34 0 0 0-28 54l12-12a18 18 0 0 1 27-25z"/>
-    <path d="M232 96a34 34 0 0 1 28 54l-12-12a18 18 0 0 0-27-25z" transform="translate(-38)"/>
-    <path d="M152 106a76 76 0 1 0 0 152 76 76 0 0 0 0-152zm0 22a54 54 0 1 1 0 108 54 54 0 0 1 0-108z"/>
-    <path d="M144 146h15v38h28v15h-43z"/>
-    <path d="M96 246l-14 22 18 12 13-22z"/>
-    <path d="M208 246l14 22-18 12-13-22z"/>
+    <!-- Bjeller -->
+    <path d="M60 14a40 40 0 0 0-33 62l14-14a22 22 0 0 1 33-29l14-14A40 40 0 0 0 60 14z"/>
+    <path d="M196 14a40 40 0 0 1 33 62l-14-14a22 22 0 0 0-33-29l-14-14a40 40 0 0 1 28-5z"/>
+    <!-- Urskive -->
+    <path d="M128 44a92 92 0 1 0 0 184 92 92 0 0 0 0-184zm0 26a66 66 0 1 1 0 132 66 66 0 0 1 0-132z"/>
+    <!-- Visere -->
+    <path d="M119 92h18v46h34v18h-52z"/>
+    <!-- Føtter -->
+    <path d="M56 222l16 10-18 26-22-14z"/>
+    <path d="M200 222l-16 10 18 26 22-14z"/>
   </g>
 </svg>

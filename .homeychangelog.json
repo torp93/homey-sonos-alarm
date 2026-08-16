@@ -1,4 +1,8 @@
 {
+  "1.0.9": {
+    "en": "Both device types show the same alarm clock.",
+    "no": "Begge enhetstypene viser samme vekkerklokke."
+  },
   "1.0.8": {
     "en": "Both device types now show an alarm clock, with the room showing two to say it holds several alarms.",
     "no": "Begge enhetstypene viser nå en vekkerklokke, og rommet viser to for å si at det holder flere alarmer."
