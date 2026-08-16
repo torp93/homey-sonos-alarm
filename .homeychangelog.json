@@ -1,4 +1,8 @@
 {
+  "1.0.7": {
+    "en": "The app icon is the Sonos wordmark again.",
+    "no": "Appikonet er Sonos-ordmerket igjen."
+  },
   "1.0.6": {
     "en": "The app icon is the alarm clock, so every flow card shows the same mark.",
     "no": "Appikonet er vekkerklokka, så alle flow-kort viser samme merke."

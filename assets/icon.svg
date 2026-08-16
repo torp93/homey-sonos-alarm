@@ -1,26 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Appikonet: klassisk vekkerklokke med to bjeller.
+  Appikonet: Sonos-ordmerket.
 
-  Rendres som en maske — bare alfakanalen brukes, og formen fargelegges med
-  brandColor. Derfor ingen fyllfarge og ingen bakgrunn her.
+  Rendres som en maske — Homey bruker bare alfakanalen og fargelegger formen
+  med brandColor. Derfor ingen fyllfarge og ingen bakgrunn her; en bakgrunnsflate
+  ville fylt hele ruten og slukt bokstavene.
 
-  Samme form som alarm-driverens ikon, og det er med vilje: flow-kort UTEN et
-  enhetsargument arver appikonet, og det finnes ingen måte å gi et enkelt kort
-  sitt eget ikon — `icon` på et flow-kort validerer, men ignoreres. Skal alle
-  kortene bære samme merke, må appikonet være det merket.
+  viewBox er utvidet til et kvadrat rundt originalen (52.13 bred, 11.7 høy) slik
+  at merket står sentrert. Padden er (52.13 - 11.7) / 2 = 20.215 i hver ende.
+  Et ordmerke som er fire og en halv gang bredere enn det er høyt kan ikke fylle
+  et kvadratisk lerret uten å strekkes, så det blir stående lavt — det er formens
+  natur, ikke en feil.
+
+  Merk: flow-kort UTEN et enhetsargument arver dette ikonet, og `icon` på et
+  enkelt kort validerer men ignoreres. Endres denne, endres de kortene også.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <g fill="#000000">
-    <!-- Bjeller -->
-    <path d="M60 14a40 40 0 0 0-33 62l14-14a22 22 0 0 1 33-29l14-14A40 40 0 0 0 60 14z"/>
-    <path d="M196 14a40 40 0 0 1 33 62l-14-14a22 22 0 0 0-33-29l-14-14a40 40 0 0 1 28-5z"/>
-    <!-- Urskive -->
-    <path d="M128 44a92 92 0 1 0 0 184 92 92 0 0 0 0-184zm0 26a66 66 0 1 1 0 132 66 66 0 0 1 0-132z"/>
-    <!-- Visere -->
-    <path d="M119 92h18v46h34v18h-52z"/>
-    <!-- Føtter -->
-    <path d="M56 222l16 10-18 26-22-14z"/>
-    <path d="M200 222l-16 10 18 26 22-14z"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"
+     viewBox="-6.015 -22.165 52.13 52.13">
+  <path clip-rule="evenodd" fill-rule="evenodd" d="M21.7 4.5L17 .1v7.4h1.4V3.4l4.7 4.4V.4h-1.4zM10.8 0C8.6 0 6.9 1.7 6.9 3.9c0 2.1 1.8 3.9 3.9 3.9 2.2 0 3.9-1.7 3.9-3.9S13 0 10.8 0m0 6.4c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5M4.5 3.9c-.4-.3-.9-.5-1.6-.7-1.4-.4-1.4-.8-1.4-1 0-.4.5-.8 1.2-.8.6 0 1.1.3 1.3.4l.1.1 1.1-.8-.1-.1s-.9-1-2.4-1C2 0 1.3.2.8.6.3 1 0 1.6 0 2.2c0 .6.3 1.2.8 1.6.4.3.9.5 1.6.7 1.4.4 1.4.8 1.4 1 0 .4-.5.8-1.2.8-.6 0-1.1-.3-1.3-.4l-.1-.1-1.1.8.1.1s.9 1 2.4 1c.7 0 1.4-.2 1.9-.6.5-.4.8-1 .8-1.6 0-.6-.3-1.1-.8-1.6M29.3 0c-2.2 0-3.9 1.7-3.9 3.9s1.8 3.9 3.9 3.9c2.2 0 3.9-1.7 3.9-3.9S31.4 0 29.3 0m0 6.4c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.2 2.5-2.5 2.5m6.3-2.6c.4.3.9.5 1.6.7 1.4.4 1.4.8 1.4 1 0 .4-.5.8-1.2.8-.6 0-1.1-.3-1.3-.4H36l-1.1.8.1.1s.9 1 2.4 1c.7 0 1.4-.2 1.9-.6.5-.4.8-1 .8-1.6 0-.6-.3-1.2-.8-1.6-.4-.3-.9-.5-1.6-.7-1.4-.4-1.4-.8-1.4-1 0-.4.5-.8 1.2-.8.6 0 1.1.3 1.3.4l.1.1 1.1-.8-.1-.1s-.9-1-2.4-1c-.7 0-1.4.2-1.9.6-.5.4-.8 1-.8 1.6-.1.6.2 1.1.8 1.5"/>
 </svg>
