@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -599,8 +599,8 @@
       {
         "id": "sonos_alarm_enable_all",
         "title": {
-          "en": "Turn on all alarms",
-          "no": "Slå på alle alarmer"
+          "en": "Turn on all alarms in every room",
+          "no": "Slå på alle alarmer i alle rom"
         },
         "hint": {
           "en": "Enables every Sonos alarm in the household, including alarms that have not been added to Homey.",
@@ -611,12 +611,8 @@
       {
         "id": "sonos_alarm_enable_room",
         "title": {
-          "en": "Turn on all alarms in a room",
-          "no": "Slå på alle alarmer i et rom"
-        },
-        "titleFormatted": {
-          "en": "Turn on all alarms in [[device]]",
-          "no": "Slå på alle alarmer i [[device]]"
+          "en": "Turn on all alarms in this room",
+          "no": "Slå på alle alarmer i dette rommet"
         },
         "args": [
           {
@@ -629,12 +625,8 @@
       {
         "id": "sonos_alarm_disable_room",
         "title": {
-          "en": "Turn off all alarms in a room",
-          "no": "Slå av alle alarmer i et rom"
-        },
-        "titleFormatted": {
-          "en": "Turn off all alarms in [[device]]",
-          "no": "Slå av alle alarmer i [[device]]"
+          "en": "Turn off all alarms in this room",
+          "no": "Slå av alle alarmer i dette rommet"
         },
         "args": [
           {
@@ -647,12 +639,8 @@
       {
         "id": "sonos_alarm_delete_room",
         "title": {
-          "en": "Delete all alarms in a room",
-          "no": "Slett alle alarmer i et rom"
-        },
-        "titleFormatted": {
-          "en": "Delete all alarms in [[device]]",
-          "no": "Slett alle alarmer i [[device]]"
+          "en": "Delete all alarms in this room",
+          "no": "Slett alle alarmer i dette rommet"
         },
         "hint": {
           "en": "Permanently deletes the alarms. Sonos has no undo, and the alarms also disappear from the Sonos app. Homey devices for them become unavailable.",
@@ -669,8 +657,8 @@
       {
         "id": "sonos_alarm_delete_all",
         "title": {
-          "en": "Delete all alarms",
-          "no": "Slett alle alarmer"
+          "en": "Delete all alarms in every room",
+          "no": "Slett alle alarmer i alle rom"
         },
         "hint": {
           "en": "Permanently deletes every alarm in the household. Sonos has no undo. Be careful what triggers this.",
@@ -681,8 +669,8 @@
       {
         "id": "sonos_alarm_disable_all",
         "title": {
-          "en": "Turn off all alarms",
-          "no": "Slå av alle alarmer"
+          "en": "Turn off all alarms in every room",
+          "no": "Slå av alle alarmer i alle rom"
         },
         "hint": {
           "en": "Disables every Sonos alarm in the household, including alarms that have not been added to Homey.",

@@ -1,4 +1,8 @@
 {
+  "1.1.1": {
+    "en": "Fixes the room flow cards showing a raw placeholder instead of the room, and separates their titles from the cards that act on every room.",
+    "no": "Retter at rom-flowkortene viste en rå plassholder i stedet for rommet, og skiller titlene deres fra kortene som gjelder alle rom."
+  },
   "1.1.0": {
     "en": "The room flow cards now take a Sonos Room device instead of a room name. Existing flows using them need the room picked again.",
     "no": "Rom-flowkortene tar nå en Sonos-rom-enhet i stedet for et romnavn. Flows som allerede bruker dem må få rommet valgt på nytt."
