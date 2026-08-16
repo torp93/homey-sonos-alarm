@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -1072,6 +1072,11 @@
         {
           "id": "add_devices",
           "template": "add_devices"
+        }
+      ],
+      "repair": [
+        {
+          "id": "configure"
         }
       ]
     },

@@ -1,0 +1,202 @@
+<!--
+  Reparasjonsvisning for en rom-enhet.
+
+  Dette er stedet der lydvalget KAN være et ekte nedtrekk. Enhetsinnstillinger
+  har statiske nedtrekk kompilert inn i manifestet, men en repair-visning er
+  egen HTML med session.setHandler — akkurat som paringen — så lista hentes
+  live fra brukerens eget anlegg.
+
+  Åpnes fra enhetens meny: Reparer.
+
+  Homey injiserer homey.js selv — ikke legg den inn her.
+-->
+<style>
+  .sa { padding: 0 16px; line-height: 1.5; overflow-x: hidden; }
+  .sa * { max-width: 100%; box-sizing: border-box; }
+  .sa label { display: block; margin: 14px 0 4px; font-size: 0.9em; opacity: 0.75; }
+  .sa select, .sa input[type="time"] { width: 100%; padding: 9px 10px; font-size: 1em;
+              border: 1px solid rgba(128,128,128,0.4); border-radius: 6px;
+              background: transparent; color: inherit; }
+  .sa input[type="range"] { width: 100%; padding: 0; border: 0;
+              background: transparent; height: 30px; }
+  .sa .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+  .sa .presets button { min-width: 0; height: 32px; padding: 0; font-size: 0.78em;
+              display: flex; align-items: center; justify-content: center;
+              border-radius: 6px; cursor: pointer; border: 1px dashed rgba(128,128,128,0.5);
+              background: transparent; color: inherit; opacity: 0.85; }
+  .sa .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
+  .sa .days button { min-width: 0; height: 38px; padding: 0; font-size: 0.8em;
+              display: flex; align-items: center; justify-content: center;
+              border-radius: 6px; cursor: pointer; border: 1px solid rgba(128,128,128,0.4);
+              background: transparent; color: inherit; overflow: hidden; }
+  .sa .days button.on { background: #1f8fff; border-color: #1f8fff; color: #fff; }
+  .sa .buttons { display: flex; gap: 10px; margin-top: 20px; }
+  .sa .buttons button { flex: 1; padding: 11px; font-size: 0.95em; border-radius: 6px;
+              cursor: pointer; border: 1px solid rgba(128,128,128,0.4);
+              background: transparent; color: inherit; }
+  .sa .buttons button.primary { background: #1f8fff; border-color: #1f8fff; color: #fff; }
+  .sa button[disabled] { opacity: 0.5; cursor: default; }
+  .sa #result { margin-top: 16px; white-space: pre-wrap; font-size: 0.88em; }
+  .sa #result.bad { color: #c0392b; }
+  .sa #result.ok { color: #1a8a3c; }
+</style>
+
+<div class="sa">
+  <div id="result"></div>
+
+  <label for="source" id="soundLabel"></label>
+  <select id="source"></select>
+
+  <label for="time" id="timeLabel"></label>
+  <input id="time" type="time" value="07:00">
+
+  <label id="daysLabel"></label>
+  <div class="presets">
+    <button type="button" id="p-daily" data-days="0123456"></button>
+    <button type="button" id="p-weekdays" data-days="12345"></button>
+    <button type="button" id="p-weekends" data-days="06"></button>
+  </div>
+  <div class="days" id="days">
+    <button type="button" class="on" data-day="1" data-key="mon"></button>
+    <button type="button" class="on" data-day="2" data-key="tue"></button>
+    <button type="button" class="on" data-day="3" data-key="wed"></button>
+    <button type="button" class="on" data-day="4" data-key="thu"></button>
+    <button type="button" class="on" data-day="5" data-key="fri"></button>
+    <button type="button" data-day="6" data-key="sat"></button>
+    <button type="button" data-day="0" data-key="sun"></button>
+  </div>
+
+  <label for="volume"><span id="volumeLabel"></span>: <span id="volumeValue">30</span></label>
+  <input id="volume" type="range" min="0" max="100" step="1" value="30">
+
+  <div class="buttons">
+    <button id="create" class="primary" type="button"></button>
+  </div>
+</div>
+
+<script type="application/javascript">
+// Egen funksjon: alle visninger i en sesjon deler ett globalt skop, og to som
+// deklarerer samme navn med const dreper hele skriptet.
+(function () {
+  var resultEl = document.getElementById('result');
+
+  function show(text, cls) {
+    resultEl.textContent = text;
+    resultEl.className = cls || '';
+  }
+
+  function t(key) { return Homey.__('pair.' + key); }
+
+  window.onerror = function (message, source, line) {
+    show(t('scriptError') + message + ' (' + line + ')', 'bad');
+    return false;
+  };
+
+  try { Homey.setTitle(t('newTitle')); } catch (error) { /* pynt */ }
+
+  var sourceEl = document.getElementById('source');
+  var timeEl = document.getElementById('time');
+  var volumeEl = document.getElementById('volume');
+  var volumeValueEl = document.getElementById('volumeValue');
+  var createBtn = document.getElementById('create');
+
+  document.getElementById('soundLabel').textContent = t('sound');
+  document.getElementById('timeLabel').textContent = t('time');
+  document.getElementById('daysLabel').textContent = t('days');
+  document.getElementById('volumeLabel').textContent = t('volume');
+  createBtn.textContent = t('create');
+
+  var dayButtons = document.getElementById('days').getElementsByTagName('button');
+  function bindDay(button) {
+    button.textContent = t(button.getAttribute('data-key'));
+    button.addEventListener('click', function () {
+      button.className = button.className === 'on' ? '' : 'on';
+    });
+  }
+  for (var i = 0; i < dayButtons.length; i++) bindDay(dayButtons[i]);
+
+  function applyPreset(digits) {
+    for (var j = 0; j < dayButtons.length; j++) {
+      var day = dayButtons[j].getAttribute('data-day');
+      dayButtons[j].className = digits.indexOf(day) !== -1 ? 'on' : '';
+    }
+  }
+
+  function bindPreset(id, key) {
+    var button = document.getElementById(id);
+    button.textContent = t(key);
+    button.addEventListener('click', function () {
+      applyPreset(button.getAttribute('data-days'));
+    });
+  }
+  bindPreset('p-daily', 'presetDaily');
+  bindPreset('p-weekdays', 'presetWeekdays');
+  bindPreset('p-weekends', 'presetWeekends');
+
+  function showVolume() { volumeValueEl.textContent = volumeEl.value; }
+  volumeEl.addEventListener('input', showVolume);
+  volumeEl.addEventListener('change', showVolume);
+
+  function recurrence() {
+    var days = [];
+    for (var k = 0; k < dayButtons.length; k++) {
+      if (dayButtons[k].className === 'on') days.push(Number(dayButtons[k].getAttribute('data-day')));
+    }
+    days.sort(function (a, b) { return a - b; });
+    if (days.length === 0) return null;
+    if (days.length === 7) return 'DAILY';
+    return 'ON_' + days.join('');
+  }
+
+  // Her ligger hele poenget: lista hentes ved kjøring fra brukerens anlegg.
+  sourceEl.innerHTML = '<option value="buzzer">' + t('loading') + '</option>';
+  Homey.emit('getSources', null, function (error, list) {
+    if (error || !list || list.length === 0) {
+      sourceEl.innerHTML = '<option value="buzzer">Sonos chime</option>';
+      if (error) show(t('roomsFailed') + (error.message || error), 'bad');
+      return;
+    }
+    sourceEl.innerHTML = '';
+    for (var m = 0; m < list.length; m++) {
+      var option = document.createElement('option');
+      option.value = list[m].id;
+      option.textContent = list[m].label || list[m].title;
+      sourceEl.appendChild(option);
+    }
+  });
+
+  // Forhåndsutfylt fra malen som ligger på enheten, så visningen fortsetter
+  // der innstillingene slapp i stedet for å nullstille dem.
+  Homey.emit('getTemplate', null, function (error, template) {
+    if (error || !template) return;
+    if (template.time) timeEl.value = template.time;
+    if (typeof template.volume === 'number') {
+      volumeEl.value = template.volume;
+      showVolume();
+    }
+    if (template.days) applyPreset(template.days);
+  });
+
+  createBtn.addEventListener('click', function () {
+    var repeat = recurrence();
+    if (!repeat) { show(t('pickDay'), 'bad'); return; }
+
+    createBtn.disabled = true;
+    show(t('creating'), '');
+
+    Homey.emit('createAlarm', {
+      startTime: timeEl.value,
+      recurrence: repeat,
+      volume: Number(volumeEl.value),
+      sourceId: sourceEl.value || 'buzzer'
+    }, function (error) {
+      createBtn.disabled = false;
+      if (error) { show(t('createFailed') + (error.message || error), 'bad'); return; }
+      show(t('created'), 'ok');
+      // Homey.createDevice finnes ikke i en repair-visning — enheten er
+      // allerede lagt til. Vi avslutter bare sesjonen.
+      setTimeout(function () { Homey.done(); }, 900);
+    });
+  });
+})();
+</script>
