@@ -61,9 +61,47 @@ test('normaliserer tidspunkter til HH:MM:SS', () => {
   assert.strictEqual(normalizeTime('23:59:59'), '23:59:59');
 });
 
+test('godtar tid uten kolon', () => {
+  // Feltet fylles ut for hånd; å kreve kolon er unødvendig tyranni.
+  assert.strictEqual(normalizeTime('0700'), '07:00:00');
+  assert.strictEqual(normalizeTime('700'), '07:00:00');
+  assert.strictEqual(normalizeTime('0730'), '07:30:00');
+  assert.strictEqual(normalizeTime('730'), '07:30:00');
+  assert.strictEqual(normalizeTime('2359'), '23:59:00');
+});
+
+test('to siffer eller færre er timer, ikke minutter', () => {
+  // «7» skal bli sju om morgenen, ikke sju minutter over midnatt.
+  assert.strictEqual(normalizeTime('7'), '07:00:00');
+  assert.strictEqual(normalizeTime('07'), '07:00:00');
+  assert.strictEqual(normalizeTime('23'), '23:00:00');
+});
+
+test('godtar punktum, bindestrek og mellomrom som skilletegn', () => {
+  assert.strictEqual(normalizeTime('07.30'), '07:30:00');
+  assert.strictEqual(normalizeTime('7.5'), '07:05:00');
+  assert.strictEqual(normalizeTime('07-30'), '07:30:00');
+  assert.strictEqual(normalizeTime('07 30'), '07:30:00');
+  assert.strictEqual(normalizeTime('  07:30  '), '07:30:00');
+  // Dobbelttastet kolon leses entydig som 07:30 — ingen grunn til å avvise
+  // en åpenbar slurvefeil når meningen er utvetydig.
+  assert.strictEqual(normalizeTime('07::30'), '07:30:00');
+});
+
+test('sekunder tas med når de er der', () => {
+  assert.strictEqual(normalizeTime('073045'), '07:30:45');
+  assert.strictEqual(normalizeTime('73045'), '07:30:45');
+  assert.strictEqual(normalizeTime('07:30:45'), '07:30:45');
+});
+
 test('avviser ugyldige tidspunkter', () => {
-  for (const value of ['24:00', '12:60', 'sju', '', null, '7']) {
-    assert.strictEqual(normalizeTime(value), null, `skulle avvist ${value}`);
+  const bad = [
+    '24:00', '12:60', 'sju', '', null, undefined,
+    '2400', '0760', '9999', // gyldig form, umulig klokkeslett
+    '1234567', '07:30:45:12', 'kl 7', '7:3o',
+  ];
+  for (const value of bad) {
+    assert.strictEqual(normalizeTime(value), null, `skulle avvist ${JSON.stringify(value)}`);
   }
 });
 

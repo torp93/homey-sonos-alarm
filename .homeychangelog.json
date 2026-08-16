@@ -1,4 +1,8 @@
 {
+  "0.15.1": {
+    "en": "The time field accepts 0700, 700, 7 and 07.30, not just 07:00.",
+    "no": "Tidsfeltet godtar 0700, 700, 7 og 07.30, ikke bare 07:00."
+  },
   "0.15.0": {
     "en": "Delete all alarms in a room in one go, and picking something to delete now switches off Apply when saving, so the alarm is not deleted and recreated in the same save.",
     "no": "Slett alle alarmer i et rom i én operasjon, og velger du noe å slette, slås «Bruk når du lagrer» av — så alarmen ikke slettes og gjenskapes i samme lagring."

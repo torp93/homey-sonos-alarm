@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -766,8 +766,8 @@
                 "no": "Tidspunkt"
               },
               "hint": {
-                "en": "24-hour clock, for example 07:00.",
-                "no": "24-timers klokke, for eksempel 07:00."
+                "en": "24-hour clock. 0700, 700, 7, 07.30 and 07:30 all work.",
+                "no": "24-timers klokke. 0700, 700, 7, 07.30 og 07:30 fungerer alle."
               },
               "value": "07:00"
             },
