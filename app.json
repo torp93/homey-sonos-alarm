@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -729,24 +729,13 @@
         "onoff",
         "sonos_room_next",
         "sonos_room_summary",
-        "sonos_room_count",
-        "button.create_alarm"
+        "sonos_room_count"
       ],
       "capabilitiesOptions": {
         "onoff": {
           "title": {
             "en": "Alarms in this room",
             "no": "Alarmer i dette rommet"
-          }
-        },
-        "button.create_alarm": {
-          "title": {
-            "en": "Create alarm",
-            "no": "Opprett alarm"
-          },
-          "desc": {
-            "en": "Creates an alarm in this room using the values set under New alarm.",
-            "no": "Oppretter en alarm i dette rommet med verdiene satt under Ny alarm."
           }
         }
       },

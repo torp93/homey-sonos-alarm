@@ -1,4 +1,8 @@
 {
+  "1.0.2": {
+    "en": "Removes the Create alarm button from room devices. It acted on values it did not show, and the Repair form and Save both do the same thing visibly.",
+    "no": "Fjerner «Opprett alarm»-knappen fra rom-enheter. Den handlet på verdier den ikke viste, og både Reparer-skjemaet og Lagre gjør det samme synlig."
+  },
   "1.0.1": {
     "en": "Fixes Create alarm failing when the room already had an alarm at that time. Sonos allows only one alarm per time per room, so that alarm is now updated instead.",
     "no": "Retter at «Opprett alarm» feilet når rommet allerede hadde en alarm på det tidspunktet. Sonos tillater bare én alarm per tidspunkt per rom, så den alarmen oppdateres nå i stedet."

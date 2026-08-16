@@ -20,10 +20,6 @@ class RoomDevice extends Homey.Device {
       this.log(`${count} alarm(er) i rommet satt til ${value ? 'på' : 'av'}`);
     });
 
-    // Vedlikeholdsknapp: lager en alarm i DETTE rommet med verdiene fra
-    // enhetsinnstillingene. Ingen romvelger — enheten er rommet.
-    this.registerCapabilityListener('button.create_alarm', () => this._createFromSettings());
-
     this._onAlarms = (alarms) => {
       this._apply(alarms).catch((error) => this.error('Oppdatering feilet', error));
     };
