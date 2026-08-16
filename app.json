@@ -1,0 +1,1039 @@
+{
+  "id": "com.thomastorp.sonos-alarm",
+  "version": "0.9.0",
+  "compatibility": ">=12.2.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "Sonos Alarms",
+    "no": "Sonos-alarmer"
+  },
+  "description": {
+    "en": "Control the alarms on your Sonos speakers from flows.",
+    "no": "Styr alarmene på Sonos-høyttalerne dine fra flows."
+  },
+  "category": [
+    "music"
+  ],
+  "tags": {
+    "en": [
+      "sonos",
+      "alarm",
+      "alarm clock",
+      "wake up",
+      "speaker",
+      "upnp",
+      "local"
+    ],
+    "no": [
+      "sonos",
+      "alarm",
+      "vekkerklokke",
+      "vekking",
+      "høyttaler",
+      "upnp",
+      "lokal"
+    ]
+  },
+  "brandColor": "#1D1D1D",
+  "author": {
+    "name": "Thomas Torp"
+  },
+  "contributors": {
+    "developers": [
+      {
+        "name": "Thomas Torp"
+      }
+    ],
+    "translators": [
+      {
+        "name": "Thomas Torp"
+      }
+    ]
+  },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "torpthomas"
+      },
+      "githubSponsors": {
+        "username": "torp93"
+      }
+    }
+  },
+  "homepage": "https://github.com/torp93/homey-sonos-alarm",
+  "support": "https://github.com/torp93/homey-sonos-alarm/issues",
+  "source": "https://github.com/torp93/homey-sonos-alarm",
+  "bugs": {
+    "url": "https://github.com/torp93/homey-sonos-alarm/issues"
+  },
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "api": {
+    "testSpeaker": {
+      "method": "POST",
+      "path": "/testSpeaker"
+    },
+    "discover": {
+      "method": "GET",
+      "path": "/discover"
+    },
+    "overview": {
+      "method": "GET",
+      "path": "/overview"
+    },
+    "listSources": {
+      "method": "GET",
+      "path": "/listSources"
+    },
+    "setEnabled": {
+      "method": "POST",
+      "path": "/setEnabled"
+    },
+    "updateAlarm": {
+      "method": "POST",
+      "path": "/updateAlarm"
+    },
+    "createAlarm": {
+      "method": "POST",
+      "path": "/createAlarm"
+    },
+    "deleteAlarm": {
+      "method": "POST",
+      "path": "/deleteAlarm"
+    }
+  },
+  "capabilities": {
+    "sonos_alarm_time": {
+      "type": "string",
+      "title": {
+        "en": "Time",
+        "no": "Tidspunkt"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/time.svg"
+    },
+    "sonos_alarm_recurrence": {
+      "type": "string",
+      "title": {
+        "en": "Repeats",
+        "no": "Gjentas"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/recurrence.svg"
+    },
+    "sonos_alarm_room": {
+      "type": "string",
+      "title": {
+        "en": "Room",
+        "no": "Rom"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/room.svg"
+    },
+    "sonos_room_next": {
+      "type": "string",
+      "title": {
+        "en": "Next alarm",
+        "no": "Neste alarm"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/time.svg"
+    },
+    "sonos_room_summary": {
+      "type": "string",
+      "title": {
+        "en": "Alarms",
+        "no": "Alarmer"
+      },
+      "getable": true,
+      "setable": false,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/recurrence.svg"
+    },
+    "sonos_room_count": {
+      "type": "number",
+      "title": {
+        "en": "Number of alarms",
+        "no": "Antall alarmer"
+      },
+      "getable": true,
+      "setable": false,
+      "decimals": 0,
+      "uiComponent": "sensor",
+      "icon": "/assets/capability-icons/room.svg"
+    },
+    "sonos_alarm_volume": {
+      "type": "number",
+      "title": {
+        "en": "Alarm volume",
+        "no": "Alarmvolum"
+      },
+      "getable": true,
+      "setable": true,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "units": {
+        "en": "%",
+        "no": "%"
+      },
+      "uiComponent": "slider",
+      "icon": "/assets/capability-icons/volume.svg"
+    }
+  },
+  "flow": {
+    "actions": [
+      {
+        "id": "sonos_alarm_set_time",
+        "title": {
+          "en": "Set the alarm time",
+          "no": "Sett alarmtidspunktet"
+        },
+        "titleFormatted": {
+          "en": "Set the alarm to [[time]]",
+          "no": "Sett alarmen til [[time]]"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=alarm"
+          },
+          {
+            "name": "time",
+            "type": "time",
+            "title": {
+              "en": "Time",
+              "no": "Tidspunkt"
+            }
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_set_volume",
+        "title": {
+          "en": "Set the alarm volume",
+          "no": "Sett alarmvolumet"
+        },
+        "titleFormatted": {
+          "en": "Set the alarm volume to [[volume]]",
+          "no": "Sett alarmvolumet til [[volume]]"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=alarm"
+          },
+          {
+            "name": "volume",
+            "type": "number",
+            "title": {
+              "en": "Volume",
+              "no": "Volum"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1,
+            "value": 30
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_set_recurrence",
+        "title": {
+          "en": "Set how the alarm repeats",
+          "no": "Sett hvordan alarmen gjentas"
+        },
+        "titleFormatted": {
+          "en": "Repeat the alarm [[recurrence]]",
+          "no": "Gjenta alarmen [[recurrence]]"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=alarm"
+          },
+          {
+            "name": "recurrence",
+            "type": "dropdown",
+            "title": {
+              "en": "Repeats",
+              "no": "Gjentas"
+            },
+            "values": [
+              {
+                "id": "ONCE",
+                "title": {
+                  "en": "once",
+                  "no": "én gang"
+                }
+              },
+              {
+                "id": "DAILY",
+                "title": {
+                  "en": "daily",
+                  "no": "daglig"
+                }
+              },
+              {
+                "id": "WEEKDAYS",
+                "title": {
+                  "en": "on weekdays",
+                  "no": "på ukedager"
+                }
+              },
+              {
+                "id": "WEEKENDS",
+                "title": {
+                  "en": "on weekends",
+                  "no": "i helgen"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_set_days",
+        "title": {
+          "en": "Set the alarm days",
+          "no": "Sett alarmdagene"
+        },
+        "titleFormatted": {
+          "en": "Repeat the alarm — Mon [[monday]], Tue [[tuesday]], Wed [[wednesday]], Thu [[thursday]], Fri [[friday]], Sat [[saturday]], Sun [[sunday]]",
+          "no": "Gjenta alarmen — man [[monday]], tir [[tuesday]], ons [[wednesday]], tor [[thursday]], fre [[friday]], lør [[saturday]], søn [[sunday]]"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=alarm"
+          },
+          {
+            "name": "monday",
+            "type": "dropdown",
+            "title": {
+              "en": "Monday",
+              "no": "Mandag"
+            },
+            "values": [
+              {
+                "id": "yes",
+                "title": {
+                  "en": "yes",
+                  "no": "ja"
+                }
+              },
+              {
+                "id": "no",
+                "title": {
+                  "en": "no",
+                  "no": "nei"
+                }
+              }
+            ]
+          },
+          {
+            "name": "tuesday",
+            "type": "dropdown",
+            "title": {
+              "en": "Tuesday",
+              "no": "Tirsdag"
+            },
+            "values": [
+              {
+                "id": "yes",
+                "title": {
+                  "en": "yes",
+                  "no": "ja"
+                }
+              },
+              {
+                "id": "no",
+                "title": {
+                  "en": "no",
+                  "no": "nei"
+                }
+              }
+            ]
+          },
+          {
+            "name": "wednesday",
+            "type": "dropdown",
+            "title": {
+              "en": "Wednesday",
+              "no": "Onsdag"
+            },
+            "values": [
+              {
+                "id": "yes",
+                "title": {
+                  "en": "yes",
+                  "no": "ja"
+                }
+              },
+              {
+                "id": "no",
+                "title": {
+                  "en": "no",
+                  "no": "nei"
+                }
+              }
+            ]
+          },
+          {
+            "name": "thursday",
+            "type": "dropdown",
+            "title": {
+              "en": "Thursday",
+              "no": "Torsdag"
+            },
+            "values": [
+              {
+                "id": "yes",
+                "title": {
+                  "en": "yes",
+                  "no": "ja"
+                }
+              },
+              {
+                "id": "no",
+                "title": {
+                  "en": "no",
+                  "no": "nei"
+                }
+              }
+            ]
+          },
+          {
+            "name": "friday",
+            "type": "dropdown",
+            "title": {
+              "en": "Friday",
+              "no": "Fredag"
+            },
+            "values": [
+              {
+                "id": "yes",
+                "title": {
+                  "en": "yes",
+                  "no": "ja"
+                }
+              },
+              {
+                "id": "no",
+                "title": {
+                  "en": "no",
+                  "no": "nei"
+                }
+              }
+            ]
+          },
+          {
+            "name": "saturday",
+            "type": "dropdown",
+            "title": {
+              "en": "Saturday",
+              "no": "Lørdag"
+            },
+            "values": [
+              {
+                "id": "yes",
+                "title": {
+                  "en": "yes",
+                  "no": "ja"
+                }
+              },
+              {
+                "id": "no",
+                "title": {
+                  "en": "no",
+                  "no": "nei"
+                }
+              }
+            ]
+          },
+          {
+            "name": "sunday",
+            "type": "dropdown",
+            "title": {
+              "en": "Sunday",
+              "no": "Søndag"
+            },
+            "values": [
+              {
+                "id": "yes",
+                "title": {
+                  "en": "yes",
+                  "no": "ja"
+                }
+              },
+              {
+                "id": "no",
+                "title": {
+                  "en": "no",
+                  "no": "nei"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_create",
+        "title": {
+          "en": "Create an alarm",
+          "no": "Opprett en alarm"
+        },
+        "titleFormatted": {
+          "en": "Create an alarm in [[room]] at [[time]] playing [[source]], repeating [[recurrence]], at volume [[volume]]",
+          "no": "Opprett en alarm i [[room]] kl. [[time]] som spiller [[source]], gjentas [[recurrence]], med volum [[volume]]"
+        },
+        "hint": {
+          "en": "The sound can be the built-in Sonos chime or any of your Sonos favourites, including radio stations.",
+          "no": "Lyden kan være den innebygde Sonos-tonen eller hvilken som helst av Sonos-favorittene dine, radiostasjoner inkludert."
+        },
+        "args": [
+          {
+            "name": "room",
+            "type": "autocomplete",
+            "title": {
+              "en": "Room",
+              "no": "Rom"
+            }
+          },
+          {
+            "name": "time",
+            "type": "time",
+            "title": {
+              "en": "Time",
+              "no": "Tidspunkt"
+            }
+          },
+          {
+            "name": "recurrence",
+            "type": "dropdown",
+            "title": {
+              "en": "Repeats",
+              "no": "Gjentas"
+            },
+            "values": [
+              {
+                "id": "ONCE",
+                "title": {
+                  "en": "once",
+                  "no": "én gang"
+                }
+              },
+              {
+                "id": "DAILY",
+                "title": {
+                  "en": "daily",
+                  "no": "daglig"
+                }
+              },
+              {
+                "id": "WEEKDAYS",
+                "title": {
+                  "en": "on weekdays",
+                  "no": "på ukedager"
+                }
+              },
+              {
+                "id": "WEEKENDS",
+                "title": {
+                  "en": "on weekends",
+                  "no": "i helgen"
+                }
+              }
+            ]
+          },
+          {
+            "name": "volume",
+            "type": "number",
+            "title": {
+              "en": "Volume",
+              "no": "Volum"
+            },
+            "min": 0,
+            "max": 100,
+            "step": 1,
+            "value": 30
+          },
+          {
+            "name": "source",
+            "type": "autocomplete",
+            "title": {
+              "en": "Sound",
+              "no": "Lyd"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "alarm_id",
+            "type": "string",
+            "title": {
+              "en": "Alarm ID",
+              "no": "Alarm-ID"
+            }
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_enable_all",
+        "title": {
+          "en": "Turn on all alarms",
+          "no": "Slå på alle alarmer"
+        },
+        "hint": {
+          "en": "Enables every Sonos alarm in the household, including alarms that have not been added to Homey.",
+          "no": "Aktiverer alle Sonos-alarmer i husholdningen, også alarmer som ikke er lagt til i Homey."
+        },
+        "args": []
+      },
+      {
+        "id": "sonos_alarm_enable_room",
+        "title": {
+          "en": "Turn on all alarms in a room",
+          "no": "Slå på alle alarmer i et rom"
+        },
+        "titleFormatted": {
+          "en": "Turn on all alarms in [[room]]",
+          "no": "Slå på alle alarmer i [[room]]"
+        },
+        "args": [
+          {
+            "name": "room",
+            "type": "autocomplete",
+            "title": {
+              "en": "Room",
+              "no": "Rom"
+            }
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_disable_room",
+        "title": {
+          "en": "Turn off all alarms in a room",
+          "no": "Slå av alle alarmer i et rom"
+        },
+        "titleFormatted": {
+          "en": "Turn off all alarms in [[room]]",
+          "no": "Slå av alle alarmer i [[room]]"
+        },
+        "args": [
+          {
+            "name": "room",
+            "type": "autocomplete",
+            "title": {
+              "en": "Room",
+              "no": "Rom"
+            }
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_delete_room",
+        "title": {
+          "en": "Delete all alarms in a room",
+          "no": "Slett alle alarmer i et rom"
+        },
+        "titleFormatted": {
+          "en": "Delete all alarms in [[room]]",
+          "no": "Slett alle alarmer i [[room]]"
+        },
+        "hint": {
+          "en": "Permanently deletes the alarms. Sonos has no undo, and the alarms also disappear from the Sonos app. Homey devices for them become unavailable.",
+          "no": "Sletter alarmene for godt. Sonos har ingen angremulighet, og alarmene forsvinner også fra Sonos-appen. Homey-enheter for dem blir utilgjengelige."
+        },
+        "args": [
+          {
+            "name": "room",
+            "type": "autocomplete",
+            "title": {
+              "en": "Room",
+              "no": "Rom"
+            }
+          }
+        ]
+      },
+      {
+        "id": "sonos_alarm_delete_all",
+        "title": {
+          "en": "Delete all alarms",
+          "no": "Slett alle alarmer"
+        },
+        "hint": {
+          "en": "Permanently deletes every alarm in the household. Sonos has no undo. Be careful what triggers this.",
+          "no": "Sletter alle alarmer i husholdningen for godt. Sonos har ingen angremulighet. Vær forsiktig med hva som trigger dette."
+        },
+        "args": []
+      },
+      {
+        "id": "sonos_alarm_disable_all",
+        "title": {
+          "en": "Turn off all alarms",
+          "no": "Slå av alle alarmer"
+        },
+        "hint": {
+          "en": "Disables every Sonos alarm in the household, including alarms that have not been added to Homey.",
+          "no": "Deaktiverer alle Sonos-alarmer i husholdningen, også alarmer som ikke er lagt til i Homey."
+        },
+        "args": []
+      }
+    ],
+    "conditions": [
+      {
+        "id": "sonos_alarm_is_enabled",
+        "title": {
+          "en": "The alarm !{{is|is not}} enabled",
+          "no": "Alarmen !{{er|er ikke}} aktivert"
+        },
+        "args": [
+          {
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=alarm"
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "id": "room",
+      "name": {
+        "en": "Sonos Room",
+        "no": "Sonos-rom"
+      },
+      "class": "other",
+      "capabilities": [
+        "onoff",
+        "sonos_room_next",
+        "sonos_room_summary",
+        "sonos_room_count",
+        "button.create_alarm"
+      ],
+      "capabilitiesOptions": {
+        "onoff": {
+          "title": {
+            "en": "Alarms in this room",
+            "no": "Alarmer i dette rommet"
+          }
+        },
+        "button.create_alarm": {
+          "maintenanceAction": true,
+          "title": {
+            "en": "Create alarm",
+            "no": "Opprett alarm"
+          },
+          "desc": {
+            "en": "Creates an alarm in this room using the values set under New alarm.",
+            "no": "Oppretter en alarm i dette rommet med verdiene satt under Ny alarm."
+          }
+        }
+      },
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "New alarm",
+            "no": "Ny alarm"
+          },
+          "children": [
+            {
+              "id": "newTime",
+              "type": "text",
+              "label": {
+                "en": "Time",
+                "no": "Tidspunkt"
+              },
+              "hint": {
+                "en": "24-hour clock, for example 07:00.",
+                "no": "24-timers klokke, for eksempel 07:00."
+              },
+              "value": "07:00"
+            },
+            {
+              "id": "newSource",
+              "type": "dropdown",
+              "label": {
+                "en": "Sound",
+                "no": "Lyd"
+              },
+              "hint": {
+                "en": "The built-in chime, or the name of a Sonos favourite such as a radio station. Leave as Sonos-tone for the built-in sound. A wrong name is reported with the full list of valid ones.",
+                "no": "Den innebygde tonen, eller navnet på en Sonos-favoritt som en radiostasjon. La den stå som Sonos-tone for den innebygde lyden. Et navn som ikke treffer rapporteres med hele lista over gyldige."
+              },
+              "value": "Sonos-tone",
+              "values": [
+                {
+                  "id": "Sonos-tone",
+                  "label": {
+                    "en": "Sonos-tone",
+                    "no": "Sonos-tone"
+                  }
+                },
+                {
+                  "id": "NRJ Norway",
+                  "label": {
+                    "en": "NRJ Norway (radio)",
+                    "no": "NRJ Norway (radio)"
+                  }
+                },
+                {
+                  "id": "NRK mP3",
+                  "label": {
+                    "en": "NRK mP3 (radio)",
+                    "no": "NRK mP3 (radio)"
+                  }
+                },
+                {
+                  "id": "P4 Lyden av Norge",
+                  "label": {
+                    "en": "P4 Lyden av Norge (radio)",
+                    "no": "P4 Lyden av Norge (radio)"
+                  }
+                },
+                {
+                  "id": "P5 Hits",
+                  "label": {
+                    "en": "P5 Hits (radio)",
+                    "no": "P5 Hits (radio)"
+                  }
+                },
+                {
+                  "id": "P7 Klem",
+                  "label": {
+                    "en": "P7 Klem (radio)",
+                    "no": "P7 Klem (radio)"
+                  }
+                },
+                {
+                  "id": "Radio Norge",
+                  "label": {
+                    "en": "Radio Norge (radio)",
+                    "no": "Radio Norge (radio)"
+                  }
+                },
+                {
+                  "id": "Starred",
+                  "label": {
+                    "en": "Starred (Spotify)",
+                    "no": "Starred (Spotify)"
+                  }
+                },
+                {
+                  "id": "FTS",
+                  "label": {
+                    "en": "FTS (Sonos-spilleliste)",
+                    "no": "FTS (Sonos-spilleliste)"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "newVolume",
+              "type": "number",
+              "label": {
+                "en": "Volume",
+                "no": "Volum"
+              },
+              "value": 30,
+              "min": 0,
+              "max": 100,
+              "units": {
+                "en": "%",
+                "no": "%"
+              }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Days",
+            "no": "Dager"
+          },
+          "children": [
+            {
+              "id": "newMonday",
+              "type": "checkbox",
+              "label": {
+                "en": "Monday",
+                "no": "Mandag"
+              },
+              "value": true
+            },
+            {
+              "id": "newTuesday",
+              "type": "checkbox",
+              "label": {
+                "en": "Tuesday",
+                "no": "Tirsdag"
+              },
+              "value": true
+            },
+            {
+              "id": "newWednesday",
+              "type": "checkbox",
+              "label": {
+                "en": "Wednesday",
+                "no": "Onsdag"
+              },
+              "value": true
+            },
+            {
+              "id": "newThursday",
+              "type": "checkbox",
+              "label": {
+                "en": "Thursday",
+                "no": "Torsdag"
+              },
+              "value": true
+            },
+            {
+              "id": "newFriday",
+              "type": "checkbox",
+              "label": {
+                "en": "Friday",
+                "no": "Fredag"
+              },
+              "value": true
+            },
+            {
+              "id": "newSaturday",
+              "type": "checkbox",
+              "label": {
+                "en": "Saturday",
+                "no": "Lørdag"
+              },
+              "value": false
+            },
+            {
+              "id": "newSunday",
+              "type": "checkbox",
+              "label": {
+                "en": "Sunday",
+                "no": "Søndag"
+              },
+              "value": false
+            }
+          ]
+        }
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/room/assets/images/small.png",
+        "large": "/drivers/room/assets/images/large.png",
+        "xlarge": "/drivers/room/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ]
+    },
+    {
+      "id": "alarm",
+      "name": {
+        "en": "Sonos Alarm",
+        "no": "Sonos-alarm"
+      },
+      "class": "other",
+      "capabilities": [
+        "onoff",
+        "sonos_alarm_time",
+        "sonos_alarm_recurrence",
+        "sonos_alarm_room",
+        "sonos_alarm_volume"
+      ],
+      "capabilitiesOptions": {
+        "onoff": {
+          "title": {
+            "en": "Enabled",
+            "no": "Aktivert"
+          },
+          "insightsTitleTrue": {
+            "en": "Alarm enabled",
+            "no": "Alarm aktivert"
+          },
+          "insightsTitleFalse": {
+            "en": "Alarm disabled",
+            "no": "Alarm deaktivert"
+          }
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/alarm/assets/images/small.png",
+        "large": "/drivers/alarm/assets/images/large.png",
+        "xlarge": "/drivers/alarm/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "start",
+          "navigation": {
+            "next": "choose"
+          }
+        },
+        {
+          "id": "choose"
+        },
+        {
+          "id": "create",
+          "navigation": {
+            "prev": "choose"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ]
+    }
+  ]
+}

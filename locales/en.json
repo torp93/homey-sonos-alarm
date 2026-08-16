@@ -1,0 +1,16 @@
+{
+  "device": {
+    "missing": "This alarm no longer exists in Sonos"
+  },
+  "settings": {
+    "title": "Sonos connection",
+    "hint": "The app talks to your speakers directly over the local network — no Sonos account or login is involved. Leave the address empty to let the app find a speaker itself.",
+    "hostLabel": "Speaker address (optional)",
+    "pollLabel": "Check for changes every",
+    "pollHint": "Sonos does not notify us when an alarm changes, so the app asks at this interval. Longer intervals are gentler on the Homey.",
+    "test": "Test connection",
+    "save": "Save",
+    "saved": "Saved",
+    "seconds": "seconds"
+  }
+}

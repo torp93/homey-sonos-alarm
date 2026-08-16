@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Appikonet rendres som en maske: Homey bruker bare alfakanalen og fargelegger
+  formen med brandColor. Derfor én ensfarget silhuett — flerfargede logoer er
+  umulige her.
+
+  Høyttaler, ikke vekkerklokke: vekkerklokka er alarm-driverens ikon, og to like
+  former gjør appen og enheten umulige å skille i lista.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <g fill="#000000">
+    <!-- Kabinett -->
+    <path d="M70 16h116a26 26 0 0 1 26 26v172a26 26 0 0 1-26 26H70a26 26 0 0 1-26-26V42a26 26 0 0 1 26-26zm0 26v172h116V42z"/>
+    <!-- Basselement -->
+    <path d="M128 118a48 48 0 1 0 0 96 48 48 0 0 0 0-96zm0 26a22 22 0 1 1 0 44 22 22 0 0 1 0-44z"/>
+    <!-- Diskant -->
+    <path d="M128 62a20 20 0 1 1 0 40 20 20 0 0 1 0-40z"/>
+  </g>
+</svg>

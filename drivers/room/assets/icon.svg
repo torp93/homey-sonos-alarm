@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Rom-enheten: samme vekkerklokke som alarm-enheten, etter ønske.
+
+  De to enhetstypene ser dermed like ut i lista, og navnet er det som skiller
+  dem. Appikonet er en høyttaler, så app og enhet er fortsatt lette å skille.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <g fill="#000000">
+    <!-- Bjeller -->
+    <path d="M60 14a40 40 0 0 0-33 62l14-14a22 22 0 0 1 33-29l14-14A40 40 0 0 0 60 14z"/>
+    <path d="M196 14a40 40 0 0 1 33 62l-14-14a22 22 0 0 0-33-29l-14-14a40 40 0 0 1 28-5z"/>
+    <!-- Urskive -->
+    <path d="M128 44a92 92 0 1 0 0 184 92 92 0 0 0 0-184zm0 26a66 66 0 1 1 0 132 66 66 0 0 1 0-132z"/>
+    <!-- Visere -->
+    <path d="M119 92h18v46h34v18h-52z"/>
+    <!-- Føtter -->
+    <path d="M56 222l16 10-18 26-22-14z"/>
+    <path d="M200 222l-16 10 18 26 22-14z"/>
+  </g>
+</svg>

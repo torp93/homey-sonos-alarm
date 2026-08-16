@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 16px 14px 40px; }
+
+    h2 { margin: 0 0 14px; font-size: 20px; }
+    h3 { margin: 22px 0 8px; font-size: 15px; font-weight: 600; }
+    p.hint { margin: 0 0 16px; opacity: .65; font-size: 13px; line-height: 1.45; }
+
+    .card { border-radius: 12px; overflow: hidden; background: rgba(128,128,128,.12); }
+    .row { display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+           border-bottom: 1px solid rgba(128,128,128,.18); }
+    .row:last-child { border-bottom: 0; }
+    .row .grow { flex: 1; min-width: 0; }
+    .row .time { font-size: 19px; }
+    .row .sub { font-size: 12.5px; opacity: .6; margin-top: 2px; }
+
+    /* Bryter. Bygget for hånd fordi en avkrysningsboks er for liten å treffe
+       på telefon, som er der denne siden faktisk brukes. */
+    .sw { position: relative; width: 50px; height: 30px; flex: none; cursor: pointer;
+          border-radius: 15px; border: 2px solid currentColor; opacity: .45;
+          transition: opacity .15s, background .15s; background: transparent; }
+    .sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+          border-radius: 50%; background: currentColor; transition: transform .15s; }
+    .sw.on { opacity: 1; }
+    .sw.on::after { transform: translateX(20px); }
+    .sw.busy { opacity: .25; cursor: default; }
+
+    .link { background: none; border: 0; padding: 0; font: inherit; cursor: pointer;
+            color: #1f8fff; }
+    .danger { color: #b3261e; }
+
+    button.action { width: 100%; padding: 13px; margin-top: 12px; font-size: 15px;
+            font-weight: 600; border-radius: 10px; cursor: pointer;
+            border: 1px solid rgba(128,128,128,.35); background: transparent; color: inherit; }
+    button.primary { background: #1f8fff; border-color: #1f8fff; color: #fff; }
+    button[disabled] { opacity: .5; cursor: default; }
+
+    label.field { display: block; font-size: 12.5px; opacity: .65; margin: 14px 0 4px; }
+    input[type="time"], select, input[type="number"] {
+            width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px;
+            border: 1px solid rgba(128,128,128,.35); border-radius: 8px;
+            background: transparent; color: inherit; }
+    input[type="range"] { width: 100%; box-sizing: border-box; padding: 0; border: 0;
+            background: transparent; height: 30px; }
+
+    /* Sju like kolonner. Med flex krymper ikke knappene under tekstbredden, og
+       den sjuende havner utenfor skjermen på telefon. */
+    .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
+    .days button { min-width: 0; padding: 10px 2px; font-size: 12.5px; border-radius: 8px;
+            cursor: pointer; border: 1px solid rgba(128,128,128,.35);
+            background: transparent; color: inherit; overflow: hidden; }
+    .days button.on { background: #1f8fff; border-color: #1f8fff; color: #fff; }
+
+    #msg { margin: 12px 0; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+    #msg.bad { color: #b3261e; }
+    #msg.ok { color: #157a3c; }
+    .muted { opacity: .6; font-size: 13px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="msg"></div>
+
+<!-- Liste -->
+<div id="listView">
+  <h2 id="t-alarms">Alarmer</h2>
+  <p class="hint" id="t-intro"></p>
+  <div id="rooms"></div>
+  <button class="action primary" id="add">+ Legg til alarm</button>
+  <button class="action" id="refresh">Oppdater</button>
+
+  <h3 id="t-conn">Tilkobling</h3>
+  <div class="card">
+    <div class="row">
+      <div class="grow">
+        <div id="hostLine" class="muted">—</div>
+        <div class="sub" id="pollLine"></div>
+      </div>
+      <button class="link" id="editConn">Endre</button>
+    </div>
+  </div>
+</div>
+
+<!-- Skjema -->
+<div id="formView" class="hidden">
+  <h2 id="formTitle">Legg til alarm</h2>
+
+  <label class="field">Tid</label>
+  <input type="time" id="f-time" value="07:00">
+
+  <label class="field">Rom</label>
+  <select id="f-room"></select>
+
+  <label class="field">Lyd</label>
+  <select id="f-source"></select>
+
+  <label class="field">Gjenta</label>
+  <div class="days" id="f-days">
+    <button type="button" class="on" data-day="1">man</button>
+    <button type="button" class="on" data-day="2">tir</button>
+    <button type="button" class="on" data-day="3">ons</button>
+    <button type="button" class="on" data-day="4">tor</button>
+    <button type="button" class="on" data-day="5">fre</button>
+    <button type="button" data-day="6">lør</button>
+    <button type="button" data-day="0">søn</button>
+  </div>
+
+  <label class="field">Volum: <span id="f-volValue">30</span>%</label>
+  <input type="range" id="f-volume" min="0" max="100" step="1" value="30">
+
+  <p class="hint" id="t-buzzer"></p>
+
+  <button class="action primary" id="save">Lagre</button>
+  <button class="action" id="cancel">Avbryt</button>
+  <button class="action danger hidden" id="remove">Slett alarmen</button>
+</div>
+
+<!-- Tilkobling -->
+<div id="connView" class="hidden">
+  <h2>Tilkobling</h2>
+  <p class="hint" id="t-conn-hint"></p>
+
+  <label class="field">Adresse til høyttaler (valgfritt)</label>
+  <input type="text" id="c-host" placeholder="192.168.1.50" autocapitalize="off" spellcheck="false"
+         style="width:100%;box-sizing:border-box;padding:10px;font-size:15px;
+                border:1px solid rgba(128,128,128,.35);border-radius:8px;
+                background:transparent;color:inherit;">
+
+  <label class="field">Se etter endringer hvert (sekund)</label>
+  <input type="number" id="c-poll" min="30" max="3600" placeholder="120">
+
+  <button class="action primary" id="c-save">Lagre</button>
+  <button class="action" id="c-back">Tilbake</button>
+</div>
+
+<script type="text/javascript">
+function onHomeyReady(Homey) {
+  var msgEl = document.getElementById('msg');
+  var editingId = null;
+
+  function show(text, cls) {
+    msgEl.textContent = text || '';
+    msgEl.className = cls || '';
+  }
+
+  function view(name) {
+    document.getElementById('listView').className = name === 'list' ? '' : 'hidden';
+    document.getElementById('formView').className = name === 'form' ? '' : 'hidden';
+    document.getElementById('connView').className = name === 'conn' ? '' : 'hidden';
+    show('');
+  }
+
+  document.getElementById('t-intro').textContent =
+    'Alarmene ligger i høyttalerne, ikke i Homey — de ringer selv om Homey er av. '
+    + 'Endringer her slår gjennom i Sonos-appen med én gang.';
+  document.getElementById('t-buzzer').textContent =
+    'Lyden kan være den innebygde Sonos-tonen eller en av favorittene dine — '
+    + 'radiostasjoner og spillelister. Vil du ha noe som ikke står i lista, '
+    + 'stjernemerk det i Sonos-appen først, så dukker det opp her.';
+  document.getElementById('t-conn-hint').textContent =
+    'Appen snakker direkte med høyttalerne over nettverket. Ingen Sonos-konto er '
+    + 'involvert. La adressen stå tom for å la appen finne en høyttaler selv.';
+
+  // ---- liste ----
+
+  var rooms = [];
+  var sources = [];
+
+  function load() {
+    show('Henter alarmer …');
+    Homey.api('GET', '/overview', null, function (error, data) {
+      if (error) { show('Kunne ikke hente alarmer: ' + error, 'bad'); return; }
+      show('');
+      rooms = data.rooms || [];
+      render(data);
+    });
+    // Kildene hentes ved siden av. Feiler de, skal alarmlista fortsatt vises —
+    // man kan lese og slå av alarmer uten å kunne lage nye.
+    Homey.api('GET', '/listSources', null, function (error, list) {
+      sources = error ? [] : (list || []);
+    });
+  }
+
+  function render(data) {
+    var container = document.getElementById('rooms');
+    container.innerHTML = '';
+
+    var alarms = data.alarms || [];
+    if (alarms.length === 0) {
+      var empty = document.createElement('p');
+      empty.className = 'muted';
+      empty.textContent = 'Ingen alarmer ennå.';
+      container.appendChild(empty);
+      return;
+    }
+
+    // Gruppert per rom, slik Sonos-appen gjør det. Alarmer hvis rom ikke lar
+    // seg slå opp havner under «Ukjent rom» i stedet for å forsvinne.
+    var order = [];
+    var groups = {};
+    for (var i = 0; i < alarms.length; i++) {
+      var key = alarms[i].roomName || 'Ukjent rom';
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(alarms[i]);
+    }
+    order.sort();
+
+    for (var j = 0; j < order.length; j++) {
+      var title = document.createElement('h3');
+      title.textContent = order[j];
+      container.appendChild(title);
+
+      var card = document.createElement('div');
+      card.className = 'card';
+      var list = groups[order[j]];
+      list.sort(function (a, b) { return a.time.localeCompare(b.time); });
+      for (var k = 0; k < list.length; k++) card.appendChild(rowFor(list[k]));
+      container.appendChild(card);
+    }
+  }
+
+  function rowFor(alarm) {
+    var row = document.createElement('div');
+    row.className = 'row';
+
+    var grow = document.createElement('div');
+    grow.className = 'grow';
+
+    var time = document.createElement('div');
+    time.className = 'time';
+    time.textContent = alarm.time;
+
+    var sub = document.createElement('div');
+    sub.className = 'sub';
+    sub.textContent = alarm.recurrenceLabel + ' · ' + (alarm.music ? 'Musikk' : 'Sonos-tone');
+
+    grow.appendChild(time);
+    grow.appendChild(sub);
+    // Trykk på raden åpner redigering, som i Sonos-appen.
+    grow.style.cursor = 'pointer';
+    grow.addEventListener('click', function () { openForm(alarm); });
+
+    var sw = document.createElement('div');
+    sw.className = 'sw' + (alarm.enabled ? ' on' : '');
+    sw.addEventListener('click', function () {
+      if (sw.className.indexOf('busy') !== -1) return;
+      var next = sw.className.indexOf('on') === -1;
+      // Bryteren flyttes med én gang og rulles tilbake hvis kallet feiler:
+      // å vente på nettverket gjør at den føles ødelagt.
+      sw.className = 'sw busy' + (next ? ' on' : '');
+      Homey.api('POST', '/setEnabled', { id: alarm.id, enabled: next }, function (error) {
+        if (error) {
+          sw.className = 'sw' + (alarm.enabled ? ' on' : '');
+          show('Kunne ikke endre alarmen: ' + error, 'bad');
+          return;
+        }
+        alarm.enabled = next;
+        sw.className = 'sw' + (next ? ' on' : '');
+      });
+    });
+
+    row.appendChild(grow);
+    row.appendChild(sw);
+    return row;
+  }
+
+  // ---- skjema ----
+
+  var dayButtons = document.getElementById('f-days').getElementsByTagName('button');
+  function bindDay(button) {
+    button.addEventListener('click', function () {
+      button.className = button.className === 'on' ? '' : 'on';
+    });
+  }
+  for (var d = 0; d < dayButtons.length; d++) bindDay(dayButtons[d]);
+
+  function setDays(recurrence) {
+    var days = [];
+    if (recurrence === 'DAILY') days = [0, 1, 2, 3, 4, 5, 6];
+    else if (recurrence === 'WEEKDAYS') days = [1, 2, 3, 4, 5];
+    else if (recurrence === 'WEEKENDS') days = [0, 6];
+    else if (recurrence && recurrence.indexOf('ON_') === 0) {
+      var digits = recurrence.substring(3).split('');
+      for (var i = 0; i < digits.length; i++) days.push(Number(digits[i]));
+    }
+    for (var j = 0; j < dayButtons.length; j++) {
+      var day = Number(dayButtons[j].getAttribute('data-day'));
+      dayButtons[j].className = days.indexOf(day) !== -1 ? 'on' : '';
+    }
+  }
+
+  function recurrence() {
+    var days = [];
+    for (var i = 0; i < dayButtons.length; i++) {
+      if (dayButtons[i].className === 'on') days.push(Number(dayButtons[i].getAttribute('data-day')));
+    }
+    days.sort(function (a, b) { return a - b; });
+    if (days.length === 0) return null;
+    if (days.length === 7) return 'DAILY';
+    return 'ON_' + days.join('');
+  }
+
+  var volumeEl = document.getElementById('f-volume');
+  var volumeValueEl = document.getElementById('f-volValue');
+  function showVolume() { volumeValueEl.textContent = volumeEl.value; }
+  volumeEl.addEventListener('input', showVolume);
+  volumeEl.addEventListener('change', showVolume);
+
+  function fillRooms(selected) {
+    var select = document.getElementById('f-room');
+    select.innerHTML = '';
+    for (var i = 0; i < rooms.length; i++) {
+      var option = document.createElement('option');
+      option.value = rooms[i].uuid;
+      option.textContent = rooms[i].name;
+      if (rooms[i].uuid === selected) option.selected = true;
+      select.appendChild(option);
+    }
+  }
+
+  function fillSources() {
+    var select = document.getElementById('f-source');
+    select.innerHTML = '';
+    for (var i = 0; i < sources.length; i++) {
+      var option = document.createElement('option');
+      option.value = sources[i].id;
+      option.textContent = sources[i].title + (sources[i].radio ? '  (radio)' : '');
+      select.appendChild(option);
+    }
+    if (sources.length === 0) {
+      var fallback = document.createElement('option');
+      fallback.value = 'buzzer';
+      fallback.textContent = 'Sonos-tone';
+      select.appendChild(fallback);
+    }
+  }
+
+  function openForm(alarm) {
+    editingId = alarm ? alarm.id : null;
+    document.getElementById('formTitle').textContent = alarm ? 'Endre alarm' : 'Legg til alarm';
+    document.getElementById('remove').className = alarm ? 'action danger' : 'action danger hidden';
+    document.getElementById('f-time').value = alarm ? alarm.time : '07:00';
+    volumeEl.value = alarm ? alarm.volume : 30;
+    showVolume();
+    setDays(alarm ? alarm.recurrence : 'WEEKDAYS');
+    // Rommet kan ikke endres på en alarm som finnes: Sonos knytter alarmen til
+    // en bestemt høyttaler, og å flytte den er en annen operasjon enn å endre
+    // tidspunktet. Feltet vises, men låst.
+    fillRooms(alarm ? alarm.groupUUID : null);
+    fillSources();
+    // Rom og lyd låses på en alarm som finnes. Å bytte kilde på en eksisterende
+    // alarm krever at vi skriver hele ProgramMetaData-blokka på nytt, og en feil
+    // der gir en alarm som ser riktig ut men er stum. Slett og lag ny i stedet.
+    document.getElementById('f-room').disabled = !!alarm;
+    document.getElementById('f-source').disabled = !!alarm;
+    if (alarm) {
+      var select = document.getElementById('f-source');
+      select.innerHTML = '';
+      var current = document.createElement('option');
+      current.textContent = alarm.music ? 'Musikk' : 'Sonos-tone';
+      select.appendChild(current);
+    }
+    view('form');
+  }
+
+  document.getElementById('add').addEventListener('click', function () {
+    if (rooms.length === 0) { show('Fant ingen rom å legge alarmen i.', 'bad'); return; }
+    openForm(null);
+  });
+  document.getElementById('refresh').addEventListener('click', load);
+  document.getElementById('cancel').addEventListener('click', function () { view('list'); load(); });
+
+  document.getElementById('save').addEventListener('click', function () {
+    var repeat = recurrence();
+    if (!repeat) { show('Velg minst én dag.', 'bad'); return; }
+
+    var saveBtn = document.getElementById('save');
+    saveBtn.disabled = true;
+    show('Lagrer …');
+
+    var done = function (error) {
+      saveBtn.disabled = false;
+      if (error) { show('Kunne ikke lagre: ' + error, 'bad'); return; }
+      view('list');
+      load();
+    };
+
+    if (editingId) {
+      Homey.api('POST', '/updateAlarm', {
+        id: editingId,
+        time: document.getElementById('f-time').value,
+        recurrence: repeat,
+        volume: Number(volumeEl.value)
+      }, done);
+    } else {
+      Homey.api('POST', '/createAlarm', {
+        roomUUID: document.getElementById('f-room').value,
+        time: document.getElementById('f-time').value,
+        recurrence: repeat,
+        volume: Number(volumeEl.value),
+        enabled: true,
+        sourceId: document.getElementById('f-source').value || 'buzzer'
+      }, done);
+    }
+  });
+
+  document.getElementById('remove').addEventListener('click', function () {
+    if (!editingId) return;
+    // Sletting er ikke reversibel, og alarmen forsvinner også fra Sonos-appen.
+    if (!confirm('Slette denne alarmen? Den fjernes også fra Sonos.')) return;
+    Homey.api('POST', '/deleteAlarm', { id: editingId }, function (error) {
+      if (error) { show('Kunne ikke slette: ' + error, 'bad'); return; }
+      view('list');
+      load();
+    });
+  });
+
+  // ---- tilkobling ----
+
+  function loadConn() {
+    Homey.get('speakerHost', function (error, value) {
+      if (!error && value) document.getElementById('c-host').value = value;
+    });
+    Homey.get('pollSeconds', function (error, value) {
+      document.getElementById('c-poll').value = (!error && value) ? value : 120;
+      document.getElementById('pollLine').textContent =
+        'Sjekker for endringer hvert ' + ((!error && value) ? value : 120) + '. sekund';
+    });
+    Homey.get('speakerHost', function (error, value) {
+      document.getElementById('hostLine').textContent =
+        (!error && value) ? value : 'Finner høyttaler automatisk';
+    });
+  }
+
+  document.getElementById('editConn').addEventListener('click', function () { view('conn'); });
+  document.getElementById('c-back').addEventListener('click', function () { view('list'); });
+
+  document.getElementById('c-save').addEventListener('click', function () {
+    var host = document.getElementById('c-host').value.trim();
+    var poll = Number(document.getElementById('c-poll').value) || 120;
+    Homey.set('speakerHost', host, function (error) {
+      if (error) { show(String(error), 'bad'); return; }
+      Homey.set('pollSeconds', poll, function (secondError) {
+        if (secondError) { show(String(secondError), 'bad'); return; }
+        loadConn();
+        view('list');
+        load();
+      });
+    });
+  });
+
+  loadConn();
+  load();
+  Homey.ready();
+}
+</script>
+</body>
+</html>

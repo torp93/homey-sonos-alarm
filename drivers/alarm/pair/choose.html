@@ -1,0 +1,43 @@
+<!--
+  Steg 2: legge til en alarm som finnes, eller lage en ny.
+
+  Homey injiserer homey.js selv — ikke legg den inn her.
+-->
+<style>
+  .sa { padding: 0 24px; line-height: 1.5; }
+  .sa p { margin: 0 0 18px; }
+  .sa button { display: block; width: 100%; padding: 14px; margin-bottom: 12px;
+               font-size: 0.95em; border-radius: 6px; cursor: pointer; text-align: left;
+               border: 1px solid rgba(128,128,128,0.4); background: transparent; color: inherit; }
+  .sa button strong { display: block; margin-bottom: 3px; }
+  .sa button span { opacity: 0.7; font-size: 0.88em; }
+  .sa button.primary { background: #1D1D1D; border-color: #1D1D1D; color: #fff; }
+  .sa button.primary span { opacity: 0.75; }
+</style>
+
+<div class="sa">
+  <p>Hva vil du gjøre?</p>
+
+  <button id="existing" class="primary">
+    <strong>Legg til en alarm som finnes</strong>
+    <span>Alarmene du allerede har satt opp i Sonos-appen</span>
+  </button>
+
+  <button id="new">
+    <strong>Lag en ny alarm</strong>
+    <span>Med den innebygde alarmlyden</span>
+  </button>
+</div>
+
+<script type="application/javascript">
+// Egen funksjon per visning: alle paringsvisningene deler ett globalt skop.
+(function () {
+  try { Homey.setTitle('Legg til alarm'); } catch (error) { /* pynt */ }
+
+  document.getElementById('existing')
+    .addEventListener('click', function () { Homey.showView('list_devices'); });
+
+  document.getElementById('new')
+    .addEventListener('click', function () { Homey.showView('create'); });
+})();
+</script>

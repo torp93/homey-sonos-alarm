@@ -1,0 +1,103 @@
+<!--
+  Steg 1: finn en Sonos-høyttaler.
+
+  Alarmlista er husholdnings-global, så det holder å nå én høyttaler — hvilken
+  som helst svarer for alle. Derfor er dette ett steg og ikke et valg per rom.
+
+  SSDP fungerer fordi appen kjører på Homey, som står på samme LAN. Manuell
+  adresse er likevel med: multicast blir borte over enkelte VLAN-oppsett.
+
+  Homey injiserer homey.js selv — ikke legg den inn her.
+-->
+<style>
+  .sa { padding: 0 24px; line-height: 1.5; }
+  .sa p { margin: 0 0 14px; }
+  .sa label { display: block; margin: 14px 0 4px; font-size: 0.9em; opacity: 0.75; }
+  .sa input { width: 100%; box-sizing: border-box; padding: 9px 10px; font-size: 1em;
+              border: 1px solid rgba(128,128,128,0.4); border-radius: 6px;
+              background: transparent; color: inherit; }
+  .sa .buttons { display: flex; gap: 10px; margin-top: 18px; }
+  .sa button { flex: 1; padding: 10px; font-size: 0.95em; border-radius: 6px; cursor: pointer;
+               border: 1px solid rgba(128,128,128,0.4); background: transparent; color: inherit; }
+  .sa button.primary { background: #1D1D1D; border-color: #1D1D1D; color: #fff; }
+  .sa button[disabled] { opacity: 0.5; cursor: default; }
+  .sa #result { margin-top: 16px; white-space: pre-wrap; font-size: 0.88em; line-height: 1.45; }
+  .sa #result.ok { color: #1a8a3c; }
+  .sa #result.bad { color: #c0392b; }
+</style>
+
+<div class="sa">
+  <p>Appen leter etter Sonos-høyttalere på nettverket. Finner den ingen, kan du
+     skrive inn adressen til én av dem manuelt.</p>
+
+  <label for="host">Adresse til en høyttaler</label>
+  <input id="host" type="text" inputmode="url" autocapitalize="off" autocorrect="off"
+         spellcheck="false" placeholder="192.168.1.50">
+
+  <div class="buttons">
+    <button id="scan">Søk på nytt</button>
+    <button id="next" class="primary">Fortsett</button>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<script type="application/javascript">
+// Egen funksjon per visning: alle paringsvisningene deler ett globalt skop, og
+// to visninger som deklarerer samme navn med const kaster hele skriptet.
+(function () {
+  try { Homey.setTitle('Finn Sonos'); } catch (error) { /* pynt */ }
+
+  const hostEl = document.getElementById('host');
+  const resultEl = document.getElementById('result');
+  const scanBtn = document.getElementById('scan');
+  const nextBtn = document.getElementById('next');
+
+  function show(text, cls) {
+    resultEl.textContent = text;
+    resultEl.className = cls || '';
+  }
+
+  function scan() {
+    show('Søker etter høyttalere …', '');
+    scanBtn.disabled = true;
+    Homey.emit('discover', null, (error, found) => {
+      scanBtn.disabled = false;
+      if (error) { show('Søket feilet: ' + (error.message || error), 'bad'); return; }
+      const hosts = (found && found.hosts) || [];
+      if (hosts.length === 0) {
+        show('Fant ingen høyttalere. Skriv inn en adresse manuelt.', 'bad');
+        return;
+      }
+      hostEl.value = hosts.sort()[0];
+      show('✓ Fant ' + hosts.length + ' høyttaler(e):\n' + hosts.join('\n'), 'ok');
+    });
+  }
+
+  scanBtn.addEventListener('click', scan);
+
+  // Har appen allerede en høyttaler, er et nytt søk bortkastet ventetid.
+  Homey.emit('currentSpeaker', null, (error, current) => {
+    if (!error && current && current.host) {
+      hostEl.value = current.host;
+      show('Bruker høyttaleren appen allerede er koblet til.\n'
+         + 'Trykk «Søk på nytt» hvis du vil lete etter andre.', 'ok');
+      return;
+    }
+    scan();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    const host = hostEl.value.trim();
+    if (!host) { show('Skriv inn en adresse, eller søk på nytt.', 'bad'); return; }
+    nextBtn.disabled = true;
+    show('Kobler til …', '');
+    Homey.emit('saveHost', { host: host }, (error, info) => {
+      nextBtn.disabled = false;
+      if (error) { show('Fikk ikke kontakt: ' + (error.message || error), 'bad'); return; }
+      // Null alarmer er ikke lenger en blindvei: neste skjerm tilbyr å lage en.
+      Homey.showView('choose');
+    });
+  });
+})();
+</script>

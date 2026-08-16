@@ -1,0 +1,16 @@
+{
+  "device": {
+    "missing": "Denne alarmen finnes ikke lenger i Sonos"
+  },
+  "settings": {
+    "title": "Sonos-tilkobling",
+    "hint": "Appen snakker direkte med høyttalerne over det lokale nettverket — ingen Sonos-konto eller innlogging er involvert. La adressen stå tom for å la appen finne en høyttaler selv.",
+    "hostLabel": "Adresse til høyttaler (valgfritt)",
+    "pollLabel": "Se etter endringer hvert",
+    "pollHint": "Sonos varsler ikke når en alarm endres, så appen spør med dette mellomrommet. Lengre intervall er skånsomt mot Homeyen.",
+    "test": "Test tilkoblingen",
+    "save": "Lagre",
+    "saved": "Lagret",
+    "seconds": "sekund"
+  }
+}

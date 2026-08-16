@@ -1,0 +1,66 @@
+{
+  "0.9.0": {
+    "en": "Sonos playlists can now be used as an alarm sound, not just favourites. Removed the redundant sound list from room device settings.",
+    "no": "Sonos-spillelister kan nå brukes som alarmlyd, ikke bare favoritter. Fjernet den overflødige lydlista fra enhetsinnstillingene for rom."
+  },
+  "0.8.2": {
+    "en": "Sound list refreshed from your Sonos favourites.",
+    "no": "Lydlista oppdatert fra Sonos-favorittene dine."
+  },
+  "0.8.1": {
+    "en": "The Sonos Room device now uses the alarm clock image too.",
+    "no": "Sonos-rom-enheten bruker nå også vekkerklokke-bildet."
+  },
+  "0.8.0": {
+    "en": "The Sonos Alarm device now has an alarm clock image. The app icon is a speaker, so the two are easy to tell apart.",
+    "no": "Sonos-alarm-enheten har nå et bilde av en vekkerklokke. Appikonet er en høyttaler, så de to er lette å skille."
+  },
+  "0.7.3": {
+    "en": "Sound names now say where they play from — Starred (Spotify), NRK mP3 (radio) — so favourites are easier to tell apart.",
+    "no": "Lydnavn viser nå hvor de spilles fra — Starred (Spotify), NRK mP3 (radio) — så favoritter er lettere å skille."
+  },
+  "0.7.2": {
+    "en": "The sound setting on a room device is now a dropdown of your Sonos favourites instead of a text field.",
+    "no": "Lyd-innstillingen på en rom-enhet er nå et nedtrekk med Sonos-favorittene dine i stedet for et tekstfelt."
+  },
+  "0.7.1": {
+    "en": "Room device settings now list your available sounds next to the sound field, so you can copy the exact name.",
+    "no": "Enhetsinnstillingene for rom viser nå de tilgjengelige lydene ved siden av lydfeltet, så du kan kopiere navnet nøyaktig."
+  },
+  "0.7.0": {
+    "en": "Create an alarm straight from a room device: set time, days, sound and volume in the device settings, then press Create alarm.",
+    "no": "Opprett en alarm rett fra en rom-enhet: sett tid, dager, lyd og volum i enhetsinnstillingene, og trykk Opprett alarm."
+  },
+  "0.6.0": {
+    "en": "Wake up to radio or music. New alarms can now use any of your Sonos favourites as the sound, not just the built-in chime — pick it while adding an alarm, in the app settings, or in a flow.",
+    "no": "Våkne til radio eller musikk. Nye alarmer kan nå bruke hvilken som helst Sonos-favoritt som lyd, ikke bare den innebygde tonen — velg den når du legger til en alarm, i appinnstillingene, eller i en flow."
+  },
+  "0.5.0": {
+    "en": "New flow cards: turn all alarms in a room on or off, and delete all alarms in a room or in the whole household.",
+    "no": "Nye flow-kort: slå alle alarmer i et rom på eller av, og slett alle alarmer i et rom eller i hele husholdningen."
+  },
+  "0.4.2": {
+    "en": "Fixes alarms created in the Sonos app being missing everywhere in Homey. They are written in a different format than alarms created here, and were skipped when reading the list.",
+    "no": "Retter at alarmer laget i Sonos-appen manglet overalt i Homey. De skrives i et annet format enn alarmer laget herfra, og ble hoppet over ved lesing av lista."
+  },
+  "0.4.1": {
+    "en": "The day buttons now fit the screen — Sunday no longer ended up outside the window.",
+    "no": "Dagsknappene får plass på skjermen — søndag havnet utenfor vinduet."
+  },
+  "0.4.0": {
+    "en": "Manage every alarm from the app settings: grouped by room, with a switch on each, plus add, edit and delete. Fixes the pairing screens, where a script conflict left the day buttons, the volume slider and the room list dead.",
+    "no": "Styr alle alarmene fra appinnstillingene: gruppert per rom, med bryter på hver, og legg til, endre og slett. Retter paringsskjermene, der en skriptkonflikt gjorde dagsknappene, volumskyveren og romlista døde."
+  },
+  "0.3.0": {
+    "en": "New Sonos Room device: one card per room showing every alarm in it, the next one due, and a switch for all of them at once. Alarm names now start with the room.",
+    "no": "Ny Sonos-rom-enhet: ett kort per rom som viser alle alarmene i rommet, neste som ringer, og en bryter for alle samtidig. Alarmnavn starter nå med rommet."
+  },
+  "0.2.0": {
+    "en": "Create new alarms, either while adding a device or from a flow. New flow cards to turn all alarms on or off at once.",
+    "no": "Opprett nye alarmer, enten når du legger til en enhet eller fra en flow. Nye flow-kort for å slå alle alarmer på eller av samtidig."
+  },
+  "0.1.0": {
+    "en": "First version. Control Sonos alarms from flows: time, volume, repeat days, and on/off.",
+    "no": "Første versjon. Styr Sonos-alarmer fra flows: tidspunkt, volum, ukedager og av/på."
+  }
+}

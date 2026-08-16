@@ -1,0 +1,14 @@
+{
+  "name": "com.thomastorp.sonos-alarm",
+  "version": "0.9.0",
+  "private": true,
+  "description": "Sonos alarms for Homey Pro, over the local UPnP AlarmClock service",
+  "main": "app.js",
+  "scripts": {
+    "sync-sources": "node scripts/sync-sources.js",
+    "test": "node --test test/soap.test.js test/alarm-clock.test.js test/recurrence.test.js test/zone-topology.test.js test/speaker-config.test.js test/discovery.test.js test/alarm-name.test.js test/room-summary.test.js test/favorites.test.js"
+  },
+  "author": "Thomas Torp",
+  "license": "MIT",
+  "dependencies": {}
+}
