@@ -9,8 +9,26 @@ const { daysToRecurrence, daysForPreset } = require('../../lib/recurrence');
 const { findSourceByTitle, describeSource } = require('../../lib/favorites');
 
 class RoomDevice extends Homey.Device {
+  // Capabilities som fjernes fra manifestet blir IKKE fjernet fra enheter som
+  // allerede har dem. Enheten beholder knappen, koden registrerer ingen lytter,
+  // og et trykk gir «Missing Capability Listener». Den må ryddes bort her.
+  static REMOVED_CAPABILITIES = ['button.create_alarm'];
+
+  async _removeOldCapabilities() {
+    for (const capability of RoomDevice.REMOVED_CAPABILITIES) {
+      if (!this.hasCapability(capability)) continue;
+      this.log(`Fjerner utgått capability ${capability}`);
+      await this.removeCapability(capability).catch((error) =>
+        this.error(`Kunne ikke fjerne ${capability}`, error));
+    }
+  }
+
   async onInit() {
     this.roomUUID = String(this.getData().id);
+
+    // Før alt annet: en gjenglemt knapp skal ikke kunne trykkes mens resten
+    // av oppstarten pågår.
+    await this._removeOldCapabilities();
 
     // Av/på gjelder hele rommet. Bevisst ingen bryter per alarm: nummererte
     // plasser flytter seg når en alarm slettes i Sonos, og en flow ville da

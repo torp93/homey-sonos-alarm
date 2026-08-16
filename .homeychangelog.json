@@ -1,4 +1,8 @@
 {
+  "1.0.3": {
+    "en": "Removes the leftover Create alarm button from room devices that already had it. Removing a capability from the app does not remove it from devices, so pressing it reported a missing listener.",
+    "no": "Fjerner den gjenglemte «Opprett alarm»-knappen fra rom-enheter som allerede hadde den. Å fjerne en capability fra appen fjerner den ikke fra enhetene, så et trykk meldte om manglende lytter."
+  },
   "1.0.2": {
     "en": "Removes the Create alarm button from room devices. It acted on values it did not show, and the Repair form and Save both do the same thing visibly.",
     "no": "Fjerner «Opprett alarm»-knappen fra rom-enheter. Den handlet på verdier den ikke viste, og både Reparer-skjemaet og Lagre gjør det samme synlig."
