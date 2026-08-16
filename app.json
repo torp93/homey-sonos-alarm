@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -850,17 +850,17 @@
               ]
             },
             {
-              "id": "createNow",
+              "id": "applyOnSave",
               "type": "checkbox",
               "label": {
-                "en": "Create the alarm when saving",
-                "no": "Opprett alarmen når du lagrer"
+                "en": "Apply when saving",
+                "no": "Bruk når du lagrer"
               },
               "hint": {
-                "en": "Tick this and press Save. The alarm is added to this room with the values above, and the box clears itself so saving again does not create a duplicate.",
-                "no": "Kryss av og trykk Lagre. Alarmen legges til i dette rommet med verdiene over, og krysset fjerner seg selv så en ny lagring ikke lager en duplikat."
+                "en": "On by default. Saving adds the alarm to this room, or updates it if an alarm with the same time, days and sound is already there — so changing the volume edits that alarm instead of adding another. Turn this off to edit the values without touching Sonos.",
+                "no": "På som standard. Lagring legger alarmen til i dette rommet, eller oppdaterer den hvis en alarm med samme tid, dager og lyd allerede finnes — så en volumendring endrer den alarmen i stedet for å legge til en ny. Slå av for å endre verdiene uten å røre Sonos."
               },
-              "value": false
+              "value": true
             },
             {
               "id": "newVolume",
@@ -876,6 +876,52 @@
                 "en": "%",
                 "no": "%"
               }
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "label": {
+            "en": "Delete an alarm",
+            "no": "Slett en alarm"
+          },
+          "children": [
+            {
+              "id": "alarmList",
+              "type": "label",
+              "label": {
+                "en": "Alarms in this room",
+                "no": "Alarmer i dette rommet"
+              },
+              "hint": {
+                "en": "Updated automatically. The number in front matches the position to pick below.",
+                "no": "Oppdateres automatisk. Tallet foran svarer til plassen du velger nedenfor."
+              },
+              "value": ""
+            },
+            {
+              "id": "deletePosition",
+              "type": "dropdown",
+              "label": {
+                "en": "Delete this one when saving",
+                "no": "Slett denne når du lagrer"
+              },
+              "hint": {
+                "en": "Pick a position from the list above and press Save. Deleting cannot be undone, and the alarm disappears from the Sonos app too. The choice resets itself afterwards.",
+                "no": "Velg en plass fra lista over og trykk Lagre. Sletting kan ikke angres, og alarmen forsvinner også fra Sonos-appen. Valget nullstiller seg selv etterpå."
+              },
+              "value": "none",
+              "values": [
+                { "id": "none", "label": { "en": "Nothing", "no": "Ingenting" } },
+                { "id": "1", "label": { "en": "1", "no": "1" } },
+                { "id": "2", "label": { "en": "2", "no": "2" } },
+                { "id": "3", "label": { "en": "3", "no": "3" } },
+                { "id": "4", "label": { "en": "4", "no": "4" } },
+                { "id": "5", "label": { "en": "5", "no": "5" } },
+                { "id": "6", "label": { "en": "6", "no": "6" } },
+                { "id": "7", "label": { "en": "7", "no": "7" } },
+                { "id": "8", "label": { "en": "8", "no": "8" } }
+              ]
             }
           ]
         },

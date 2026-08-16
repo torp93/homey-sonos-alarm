@@ -1,7 +1,7 @@
 {
-  "0.13.0": {
-    "en": "Create an alarm straight from a room device by ticking Create the alarm when saving and pressing Save. No hidden button to find.",
-    "no": "Opprett en alarm rett fra en rom-enhet ved å krysse av for «Opprett alarmen når du lagrer» og trykke Lagre. Ingen skjult knapp å lete etter."
+  "0.14.0": {
+    "en": "Room devices now apply on save: the alarm is added, or updated if one with the same time, days and sound is already in the room. A numbered list of the room alarms lets you delete one by picking its position and saving.",
+    "no": "Rom-enheter bruker nå innstillingene når du lagrer: alarmen legges til, eller oppdateres hvis en med samme tid, dager og lyd allerede finnes i rommet. En nummerert liste over alarmene lar deg slette én ved å velge plassen og lagre."
   },
   "0.12.0": {
     "en": "Create alarm is now a button on the room device itself. As a maintenance action it was invisible in the Homey web app.",

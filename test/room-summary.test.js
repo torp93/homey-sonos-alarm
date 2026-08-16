@@ -5,6 +5,7 @@ const assert = require('node:assert');
 
 const {
   alarmsForRoom, nextAlarm, nextOccurrence, describeRoom, formatTime,
+  sortedByTime, numberedList, alarmAtPosition,
 } = require('../lib/room-summary');
 
 const BUZZER = 'x-rincon-buzzer:0';
@@ -85,6 +86,46 @@ test('oppsummeringen sorterer på tid og merker avslåtte', () => {
     alarm({ startTime: '08:00:00', recurrence: 'DAILY', enabled: true }),
   ];
   assert.strictEqual(describeRoom(alarms, 'no'), '08:00 Daglig · 10:00 Ukedager (av)');
+});
+
+test('nummerert liste sorterer på tid og starter på 1', () => {
+  // Numrene er det eneste som knytter nedtrekket til en bestemt alarm, så
+  // rekkefølgen må være stabil. Sonos gir alarmene i vilkårlig rekkefølge.
+  const alarms = [
+    alarm({ id: 'sen', startTime: '22:00:00', recurrence: 'DAILY' }),
+    alarm({ id: 'tidlig', startTime: '06:30:00', recurrence: 'WEEKDAYS' }),
+  ];
+  assert.strictEqual(numberedList(alarms, 'no'), '1: 06:30 Ukedager\n2: 22:00 Daglig');
+});
+
+test('avslåtte alarmer merkes i lista', () => {
+  const alarms = [alarm({ startTime: '07:00:00', recurrence: 'DAILY', enabled: false })];
+  assert.strictEqual(numberedList(alarms, 'no'), '1: 07:00 Daglig — av');
+});
+
+test('plassoppslag følger samme sortering som lista', () => {
+  const alarms = [
+    alarm({ id: 'sen', startTime: '22:00:00' }),
+    alarm({ id: 'tidlig', startTime: '06:30:00' }),
+  ];
+  assert.strictEqual(alarmAtPosition(alarms, 1).id, 'tidlig');
+  assert.strictEqual(alarmAtPosition(alarms, '2').id, 'sen');
+});
+
+test('plass utenfor lista gir null i stedet for feil alarm', () => {
+  // Slettingen er ikke reversibel, så et oppslag som bommer må gi ingenting
+  // framfor å treffe en tilfeldig nabo.
+  const alarms = [alarm({ startTime: '07:00:00' })];
+  assert.strictEqual(alarmAtPosition(alarms, 2), null);
+  assert.strictEqual(alarmAtPosition(alarms, 0), null);
+  assert.strictEqual(alarmAtPosition(alarms, 'none'), null);
+  assert.strictEqual(alarmAtPosition([], 1), null);
+});
+
+test('sortering endrer ikke lista som ble sendt inn', () => {
+  const alarms = [alarm({ id: 'b', startTime: '22:00:00' }), alarm({ id: 'a', startTime: '06:00:00' })];
+  sortedByTime(alarms);
+  assert.strictEqual(alarms[0].id, 'b');
 });
 
 test('tomt rom sier det tydelig', () => {

@@ -2,9 +2,9 @@
 
 const Homey = require('homey');
 const {
-  alarmsForRoom, nextAlarm, describeRoom, formatTime,
+  alarmsForRoom, nextAlarm, describeRoom, formatTime, numberedList, alarmAtPosition,
 } = require('../../lib/room-summary');
-const { normalizeTime } = require('../../lib/alarm-clock');
+const { normalizeTime, findEquivalentAlarm } = require('../../lib/alarm-clock');
 const { daysToRecurrence } = require('../../lib/recurrence');
 const { findSourceByTitle } = require('../../lib/favorites');
 
@@ -36,21 +36,55 @@ class RoomDevice extends Homey.Device {
 
   async onSettings({ newSettings, changedKeys }) {
     this.log('Innstillinger lagret, endret:', changedKeys.join(', '));
-    if (newSettings.createNow !== true) return;
+    const deleting = newSettings.deletePosition && newSettings.deletePosition !== 'none';
+    if (newSettings.applyOnSave === false && !deleting) return;
 
-    // Opprettelsen kjøres ETTER at Homey har lagret. Kaller man setSettings
-    // inne i onSettings, kaster Homey — derfor både opprettelsen og
-    // nullstillingen av krysset skjer i neste runde.
+    // Bare endringer i selve alarmen skal utløse noe. Uten dette ville en
+    // endring av en helt urelatert innstilling skrevet til Sonos.
+    const relevant = [
+      'newTime', 'newSource', 'newVolume', 'applyOnSave', 'deletePosition',
+      'newMonday', 'newTuesday', 'newWednesday', 'newThursday',
+      'newFriday', 'newSaturday', 'newSunday',
+    ];
+    if (!changedKeys.some((key) => relevant.includes(key))) return;
+
+    // Kjøres ETTER at Homey er ferdig med lagringen: setSettings inne i
+    // onSettings kaster.
     this.homey.setTimeout(() => {
-      this._createFromSettings()
-        .then(() => this.setSettings({ createNow: false }))
-        .catch((error) => {
-          this.error('Opprettelse fra innstillinger feilet', error);
-          // Krysset nullstilles uansett: står det igjen, lager neste lagring
-          // en alarm til uten at brukeren ba om det.
-          this.setSettings({ createNow: false }).catch(() => {});
-        });
+      this._applySettings(newSettings)
+        .catch((error) => this.error('Kunne ikke bruke innstillingene', error));
     }, 500);
+  }
+
+  async _applySettings(settings) {
+    // Sletting først: velger man en plass OG endrer alarmverdiene i samme
+    // lagring, skal den gamle bort før den nye legges til. Motsatt rekkefølge
+    // ville flyttet nummereringen under føttene på slettingen.
+    if (settings.deletePosition && settings.deletePosition !== 'none') {
+      await this._deleteAtPosition(settings.deletePosition);
+      // Nullstilles alltid, ellers sletter neste lagring en alarm til.
+      await this.setSettings({ deletePosition: 'none' }).catch(() => {});
+    }
+
+    if (settings.applyOnSave !== false) await this._createFromSettings();
+  }
+
+  async _deleteAtPosition(position) {
+    const resolve = await this.homey.app.coordinatorResolver();
+    const client = await this.homey.app.getClient();
+    const mine = alarmsForRoom(await client.listAlarms(), resolve, this.roomUUID);
+
+    // Lista leses på nytt her, ikke fra det etiketten viste. Er en alarm
+    // slettet i mellomtiden, peker plassen på noe annet — derfor logges det
+    // nøyaktig hva som faktisk forsvant.
+    const target = alarmAtPosition(mine, position);
+    if (!target) {
+      this.error(`Plass ${position} finnes ikke blant ${mine.length} alarm(er) — sletter ingenting`);
+      return;
+    }
+
+    this.log(`Sletter alarm ${target.id} (${target.startTime}) fra plass ${position}`);
+    await this.homey.app.deleteAlarm(target.id);
   }
 
   async onUninit() {
@@ -62,6 +96,7 @@ class RoomDevice extends Homey.Device {
   // vært der lengst, og «Opprett alarm» feiler på et tidspunkt som aldri ble satt.
   async _fillMissingSettings() {
     const defaults = {
+      applyOnSave: true,
       newTime: '07:00',
       newSource: 'Sonos chime',
       newVolume: 30,
@@ -120,6 +155,26 @@ class RoomDevice extends Homey.Device {
       throw new Error(`${this.homey.__('error.unknownSource')} ${names}`);
     }
 
+    // Lagre skal alltid gjelde, uten at brukeren må huske et kryss. Da MÅ
+    // opprettelsen være idempotent: uten dette ville hver volumjustering blitt
+    // en ny alarm i stedet for en endring av den som allerede finnes.
+    const client = await this.homey.app.getClient();
+    const resolve = await this.homey.app.coordinatorResolver();
+    const existing = findEquivalentAlarm(
+      await client.listAlarms(),
+      { startTime: time, recurrence, programURI: source.uri },
+      (alarm) => resolve(alarm.roomUUID) === this.roomUUID,
+    );
+
+    if (existing) {
+      await this.homey.app.applyChange(existing.id, {
+        volume: Number(settings.newVolume),
+        enabled: true,
+      });
+      this.log(`Alarm ${existing.id} fantes fra før — oppdatert i stedet for duplisert`);
+      return;
+    }
+
     const created = await this.homey.app.createAlarm({
       roomUUID: this.roomUUID,
       startTime: time,
@@ -148,6 +203,14 @@ class RoomDevice extends Homey.Device {
     await this._set('sonos_room_next', next
       ? formatTime(next.at)
       : (language === 'no' ? 'Ingen' : 'None'));
+
+    // Etiketten oppdateres ved hver polling, så numrene i nedtrekket alltid
+    // svarer til noe som faktisk finnes. Etiketter kan settes ved kjøring —
+    // nedtrekk kan ikke, og det er hele grunnen til at det er nummer og ikke navn.
+    const listing = numberedList(mine, language);
+    if (this.getSettings().alarmList !== listing) {
+      await this.setSettings({ alarmList: listing }).catch(() => {});
+    }
   }
 
   async _set(capability, value) {

@@ -5,7 +5,7 @@ const assert = require('node:assert');
 
 const {
   parseAlarms, normalizeTime, clampVolume, alarmToArgs, validateAlarm, normalizeAlarm,
-  mergeAlarm, ALARM_FIELDS, CREATE_FIELDS, BUZZER_URI,
+  mergeAlarm, findEquivalentAlarm, ALARM_FIELDS, CREATE_FIELDS, BUZZER_URI,
 } = require('../lib/alarm-clock');
 const { LIST_ALARMS_RESPONSE } = require('./fixtures');
 
@@ -158,6 +158,37 @@ test('argumentene som sendes har alltid HH:MM:SS', () => {
   })));
   assert.strictEqual(args.get('StartLocalTime'), '07:05:00');
   assert.strictEqual(args.get('Duration'), '02:00:00');
+});
+
+test('finner en alarm som allerede finnes, uansett volum og av/på', () => {
+  // «Bruk når du lagrer» står alltid på, så uten dette oppslaget ville hver
+  // volumjustering blitt en ny alarm i stedet for en endring av den gamle.
+  const alarms = parseAlarms(LIST_ALARMS_RESPONSE);
+  const buzzer = alarms.find((alarm) => alarm.id === '575');
+  const match = findEquivalentAlarm(alarms, {
+    startTime: '8:00',
+    recurrence: 'daily',
+    programURI: BUZZER_URI,
+  }, () => true);
+  assert.strictEqual(match.id, buzzer.id);
+});
+
+test('ulik tid, dager eller lyd er en annen alarm', () => {
+  const alarms = parseAlarms(LIST_ALARMS_RESPONSE);
+  const base = { startTime: '08:00', recurrence: 'DAILY', programURI: BUZZER_URI };
+  assert.strictEqual(findEquivalentAlarm(alarms, { ...base, startTime: '08:30' }, () => true), null);
+  assert.strictEqual(findEquivalentAlarm(alarms, { ...base, recurrence: 'ONCE' }, () => true), null);
+  assert.strictEqual(findEquivalentAlarm(alarms, { ...base, programURI: 'x-other:1' }, () => true), null);
+});
+
+test('en alarm i et annet rom teller ikke som den samme', () => {
+  const alarms = parseAlarms(LIST_ALARMS_RESPONSE);
+  const match = findEquivalentAlarm(alarms, {
+    startTime: '08:00',
+    recurrence: 'DAILY',
+    programURI: BUZZER_URI,
+  }, () => false);
+  assert.strictEqual(match, null);
 });
 
 test('tom liste gir tomt resultat i stedet for å kaste', () => {
