@@ -1,4 +1,8 @@
 {
+  "1.0.1": {
+    "en": "Fixes Create alarm failing when the room already had an alarm at that time. Sonos allows only one alarm per time per room, so that alarm is now updated instead.",
+    "no": "Retter at «Opprett alarm» feilet når rommet allerede hadde en alarm på det tidspunktet. Sonos tillater bare én alarm per tidspunkt per rom, så den alarmen oppdateres nå i stedet."
+  },
   "1.0.0": {
     "en": "First release. Set the alarms on your Sonos speakers from Homey and wake up to a radio station, a playlist or the built-in chime. Alarms can be created, changed and deleted from the app, from a room, or from a flow, and a whole room can be switched on or off at once.",
     "no": "Første utgivelse. Still alarmene på Sonos-høyttalerne dine fra Homey og våkne til en radiostasjon, en spilleliste eller den innebygde tonen. Alarmer kan opprettes, endres og slettes fra appen, fra et rom, eller fra en flow, og et helt rom kan slås av eller på samtidig."

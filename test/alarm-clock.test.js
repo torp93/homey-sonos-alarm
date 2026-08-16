@@ -213,12 +213,16 @@ test('finner en alarm som allerede finnes, uansett volum og av/på', () => {
   assert.strictEqual(match.id, buzzer.id);
 });
 
-test('ulik tid, dager eller lyd er en annen alarm', () => {
+test('bare tidspunktet skiller alarmer i samme rom', () => {
+  // Sonos tillater ikke to alarmer på samme starttid i samme rom — forsøk gir
+  // UPnP 801, uansett dager og lyd. Derfor teller verken gjentakelse eller
+  // kilde med: de er ting man ENDRER på alarmen som allerede står der.
   const alarms = parseAlarms(LIST_ALARMS_RESPONSE);
   const base = { startTime: '08:00', recurrence: 'DAILY', programURI: BUZZER_URI };
+
+  assert.strictEqual(findEquivalentAlarm(alarms, { ...base, recurrence: 'ONCE' }, () => true).id, '575');
+  assert.strictEqual(findEquivalentAlarm(alarms, { ...base, programURI: 'x-other:1' }, () => true).id, '575');
   assert.strictEqual(findEquivalentAlarm(alarms, { ...base, startTime: '08:30' }, () => true), null);
-  assert.strictEqual(findEquivalentAlarm(alarms, { ...base, recurrence: 'ONCE' }, () => true), null);
-  assert.strictEqual(findEquivalentAlarm(alarms, { ...base, programURI: 'x-other:1' }, () => true), null);
 });
 
 test('en alarm i et annet rom teller ikke som den samme', () => {

@@ -4,7 +4,7 @@ const Homey = require('homey');
 const {
   alarmsForRoom, nextAlarm, describeRoom, formatTime, numberedList, alarmAtPosition,
 } = require('../../lib/room-summary');
-const { normalizeTime, findEquivalentAlarm } = require('../../lib/alarm-clock');
+const { normalizeTime, findEquivalentAlarm, BUZZER_URI } = require('../../lib/alarm-clock');
 const { daysToRecurrence, daysForPreset } = require('../../lib/recurrence');
 const { findSourceByTitle, describeSource } = require('../../lib/favorites');
 
@@ -241,11 +241,18 @@ class RoomDevice extends Homey.Device {
     );
 
     if (existing) {
+      // Rommet har allerede en alarm på dette klokkeslettet, og Sonos tillater
+      // ikke to. Den oppdateres med alt fra malen i stedet — ellers ville
+      // opprettelsen feilet med UPnP 801.
       await this.homey.app.applyChange(existing.id, {
+        recurrence,
         volume: Number(settings.newVolume),
         enabled: true,
+        programURI: source.uri,
+        programMetaData: source.metadata,
+        playMode: source.uri === BUZZER_URI || source.radio ? 'NORMAL' : 'SHUFFLE',
       });
-      this.log(`Alarm ${existing.id} fantes fra før — oppdatert i stedet for duplisert`);
+      this.log(`Alarm ${existing.id} fantes på ${time} — oppdatert i stedet for duplisert`);
       return;
     }
 
