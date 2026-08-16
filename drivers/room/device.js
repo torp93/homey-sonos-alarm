@@ -57,33 +57,45 @@ class RoomDevice extends Homey.Device {
   }
 
   async _applySettings(settings) {
-    // Sletting først: velger man en plass OG endrer alarmverdiene i samme
-    // lagring, skal den gamle bort før den nye legges til. Motsatt rekkefølge
-    // ville flyttet nummereringen under føttene på slettingen.
-    if (settings.deletePosition && settings.deletePosition !== 'none') {
-      await this._deleteAtPosition(settings.deletePosition);
-      // Nullstilles alltid, ellers sletter neste lagring en alarm til.
-      await this.setSettings({ deletePosition: 'none' }).catch(() => {});
+    const deleting = settings.deletePosition && settings.deletePosition !== 'none';
+
+    if (deleting) {
+      await this._deleteSelection(settings.deletePosition);
+
+      // Sletting og gjenoppretting i samme lagring gjorde slettingen
+      // meningsløs: alarmen ble borte og lagt til igjen i samme trykk. Derfor
+      // slås «Bruk når du lagrer» av her, og opprettelsen hoppes over.
+      await this.setSettings({ deletePosition: 'none', applyOnSave: false }).catch(() => {});
+      return;
     }
 
     if (settings.applyOnSave !== false) await this._createFromSettings();
   }
 
-  async _deleteAtPosition(position) {
+  async _deleteSelection(selection) {
     const resolve = await this.homey.app.coordinatorResolver();
     const client = await this.homey.app.getClient();
+    // Lista leses på nytt her, ikke fra det etiketten viste. Er en alarm
+    // slettet i mellomtiden, peker plassen på noe annet.
     const mine = alarmsForRoom(await client.listAlarms(), resolve, this.roomUUID);
 
-    // Lista leses på nytt her, ikke fra det etiketten viste. Er en alarm
-    // slettet i mellomtiden, peker plassen på noe annet — derfor logges det
-    // nøyaktig hva som faktisk forsvant.
-    const target = alarmAtPosition(mine, position);
-    if (!target) {
-      this.error(`Plass ${position} finnes ikke blant ${mine.length} alarm(er) — sletter ingenting`);
+    if (selection === 'all') {
+      if (mine.length === 0) {
+        this.log('Ingen alarmer i rommet — sletter ingenting');
+        return;
+      }
+      this.log(`Sletter alle ${mine.length} alarm(er) i rommet`);
+      await this.homey.app.deleteAlarms(mine, this.getName());
       return;
     }
 
-    this.log(`Sletter alarm ${target.id} (${target.startTime}) fra plass ${position}`);
+    const target = alarmAtPosition(mine, selection);
+    if (!target) {
+      this.error(`Plass ${selection} finnes ikke blant ${mine.length} alarm(er) — sletter ingenting`);
+      return;
+    }
+
+    this.log(`Sletter alarm ${target.id} (${target.startTime}) fra plass ${selection}`);
     await this.homey.app.deleteAlarm(target.id);
   }
 

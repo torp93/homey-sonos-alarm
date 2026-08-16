@@ -1,4 +1,8 @@
 {
+  "0.15.0": {
+    "en": "Delete all alarms in a room in one go, and picking something to delete now switches off Apply when saving, so the alarm is not deleted and recreated in the same save.",
+    "no": "Slett alle alarmer i et rom i én operasjon, og velger du noe å slette, slås «Bruk når du lagrer» av — så alarmen ikke slettes og gjenskapes i samme lagring."
+  },
   "0.14.0": {
     "en": "Room devices now apply on save: the alarm is added, or updated if one with the same time, days and sound is already in the room. A numbered list of the room alarms lets you delete one by picking its position and saving.",
     "no": "Rom-enheter bruker nå innstillingene når du lagrer: alarmen legges til, eller oppdateres hvis en med samme tid, dager og lyd allerede finnes i rommet. En nummerert liste over alarmene lar deg slette én ved å velge plassen og lagre."

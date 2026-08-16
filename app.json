@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -907,20 +907,81 @@
                 "no": "Slett denne når du lagrer"
               },
               "hint": {
-                "en": "Pick a position from the list above and press Save. Deleting cannot be undone, and the alarm disappears from the Sonos app too. The choice resets itself afterwards.",
-                "no": "Velg en plass fra lista over og trykk Lagre. Sletting kan ikke angres, og alarmen forsvinner også fra Sonos-appen. Valget nullstiller seg selv etterpå."
+                "en": "Pick a position from the list above and press Save. Apply when saving is switched off at the same time, so the alarm is not recreated in the same save. Deleting cannot be undone, and the alarm disappears from the Sonos app too. The choice resets itself afterwards.",
+                "no": "Velg en plass fra lista over og trykk Lagre. «Bruk når du lagrer» slås av samtidig, så alarmen ikke gjenskapes i samme lagring. Sletting kan ikke angres, og alarmen forsvinner også fra Sonos-appen. Valget nullstiller seg selv etterpå."
               },
               "value": "none",
               "values": [
-                { "id": "none", "label": { "en": "Nothing", "no": "Ingenting" } },
-                { "id": "1", "label": { "en": "1", "no": "1" } },
-                { "id": "2", "label": { "en": "2", "no": "2" } },
-                { "id": "3", "label": { "en": "3", "no": "3" } },
-                { "id": "4", "label": { "en": "4", "no": "4" } },
-                { "id": "5", "label": { "en": "5", "no": "5" } },
-                { "id": "6", "label": { "en": "6", "no": "6" } },
-                { "id": "7", "label": { "en": "7", "no": "7" } },
-                { "id": "8", "label": { "en": "8", "no": "8" } }
+                {
+                  "id": "none",
+                  "label": {
+                    "en": "Nothing",
+                    "no": "Ingenting"
+                  }
+                },
+                {
+                  "id": "all",
+                  "label": {
+                    "en": "All alarms in this room",
+                    "no": "Alle alarmer i dette rommet"
+                  }
+                },
+                {
+                  "id": "1",
+                  "label": {
+                    "en": "1",
+                    "no": "1"
+                  }
+                },
+                {
+                  "id": "2",
+                  "label": {
+                    "en": "2",
+                    "no": "2"
+                  }
+                },
+                {
+                  "id": "3",
+                  "label": {
+                    "en": "3",
+                    "no": "3"
+                  }
+                },
+                {
+                  "id": "4",
+                  "label": {
+                    "en": "4",
+                    "no": "4"
+                  }
+                },
+                {
+                  "id": "5",
+                  "label": {
+                    "en": "5",
+                    "no": "5"
+                  }
+                },
+                {
+                  "id": "6",
+                  "label": {
+                    "en": "6",
+                    "no": "6"
+                  }
+                },
+                {
+                  "id": "7",
+                  "label": {
+                    "en": "7",
+                    "no": "7"
+                  }
+                },
+                {
+                  "id": "8",
+                  "label": {
+                    "en": "8",
+                    "no": "8"
+                  }
+                }
               ]
             }
           ]
