@@ -25,6 +25,11 @@
               background: transparent; height: 30px; }
   /* Grid, ikke flex: med «flex: 1» krymper ikke knappene under tekstbredden,
      og den sjuende havner utenfor skjermen. */
+  .sa .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+  .sa .presets button { min-width: 0; height: 32px; padding: 0; font-size: 0.78em;
+              display: flex; align-items: center; justify-content: center;
+              border-radius: 6px; cursor: pointer; border: 1px dashed rgba(128,128,128,0.5);
+              background: transparent; color: inherit; opacity: 0.85; overflow: hidden; }
   .sa .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
   /* Flex i hver rute sentrerer teksten både vannrett og loddrett. Uten dette
      satt dagene skjevt, siden knappene er smale og teksten ulik i bredde. */
@@ -64,6 +69,13 @@
   <input id="time" type="time" value="07:00">
 
   <label id="daysLabel"></label>
+  <!-- Hurtigvalg: ukedager og helg er de to vanligste, og sju enkelttrykk for
+       dem er unødvendig tungvint. -->
+  <div class="presets">
+    <button type="button" id="p-daily" data-days="0123456"></button>
+    <button type="button" id="p-weekdays" data-days="12345"></button>
+    <button type="button" id="p-weekends" data-days="06"></button>
+  </div>
   <!-- Ligger i HTML, ikke bygget i JS: en feil i skriptet skal ikke kunne
        etterlate en tom rad. data-day er Sonos sin nummerering, søndag er 0. -->
   <div class="days" id="days">
@@ -132,6 +144,27 @@
     });
   }
   for (var i = 0; i < dayButtons.length; i++) bindDay(dayButtons[i]);
+
+  // Hurtigvalgene SETTER utvalget i stedet for å legge til, så to trykk aldri
+  // gir en blanding brukeren ikke ba om.
+  function applyPreset(digits) {
+    for (var j = 0; j < dayButtons.length; j++) {
+      var day = dayButtons[j].getAttribute('data-day');
+      dayButtons[j].className = digits.indexOf(day) !== -1 ? 'on' : '';
+    }
+  }
+
+  function bindPreset(id, key) {
+    var button = document.getElementById(id);
+    button.textContent = t(key);
+    button.addEventListener('click', function () {
+      applyPreset(button.getAttribute('data-days'));
+    });
+  }
+
+  bindPreset('p-daily', 'presetDaily');
+  bindPreset('p-weekdays', 'presetWeekdays');
+  bindPreset('p-weekends', 'presetWeekends');
 
   function showVolume() { volumeValueEl.textContent = volumeEl.value; }
   volumeEl.addEventListener('input', showVolume);

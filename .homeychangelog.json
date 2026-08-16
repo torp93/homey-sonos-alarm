@@ -1,4 +1,8 @@
 {
+  "0.11.0": {
+    "en": "Quick day presets when creating an alarm: every day, weekdays and weekends. Room devices added before the alarm template settings existed now get the default values filled in.",
+    "no": "Hurtigvalg for dager når du oppretter en alarm: hver dag, ukedager og helg. Rom-enheter som ble lagt til før innstillingene fantes, får nå fylt inn standardverdiene."
+  },
   "0.10.0": {
     "en": "English is now the default language, with Norwegian as a translation. Day buttons are centred and easier to read.",
     "no": "Engelsk er nå standardspråk, med norsk som oversettelse. Dagsknappene er sentrert og lettere å lese."

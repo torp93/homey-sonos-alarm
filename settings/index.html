@@ -50,6 +50,11 @@
             background: transparent; height: 30px; }
 
     /* Sju like kolonner, og flex inni hver rute så teksten står sentrert. */
+    .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+    .presets button { min-width: 0; height: 34px; padding: 0; font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px; cursor: pointer; border: 1px dashed rgba(128,128,128,.5);
+            background: transparent; color: inherit; opacity: .85; overflow: hidden; }
     .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
     .days button { min-width: 0; height: 40px; padding: 0; font-size: 12.5px;
             display: flex; align-items: center; justify-content: center;
@@ -100,6 +105,12 @@
   <select id="f-source"></select>
 
   <label class="field" data-i18n="pair.days"></label>
+  <!-- Hurtigvalg for de to vanligste mønstrene. -->
+  <div class="presets">
+    <button type="button" id="p-daily" data-days="0123456" data-i18n="pair.presetDaily"></button>
+    <button type="button" id="p-weekdays" data-days="12345" data-i18n="pair.presetWeekdays"></button>
+    <button type="button" id="p-weekends" data-days="06" data-i18n="pair.presetWeekends"></button>
+  </div>
   <div class="days" id="f-days">
     <button type="button" class="on" data-day="1" data-key="mon"></button>
     <button type="button" class="on" data-day="2" data-key="tue"></button>
@@ -272,6 +283,21 @@ function onHomeyReady(Homey) {
     });
   }
   for (var d = 0; d < dayButtons.length; d++) bindDay(dayButtons[d]);
+
+  // Hurtigvalgene SETTER utvalget, de legger ikke til.
+  function bindPreset(id) {
+    var button = document.getElementById(id);
+    button.addEventListener('click', function () {
+      var digits = button.getAttribute('data-days');
+      for (var i = 0; i < dayButtons.length; i++) {
+        var day = dayButtons[i].getAttribute('data-day');
+        dayButtons[i].className = digits.indexOf(day) !== -1 ? 'on' : '';
+      }
+    });
+  }
+  bindPreset('p-daily');
+  bindPreset('p-weekdays');
+  bindPreset('p-weekends');
 
   function setDays(recurrence) {
     var days = [];

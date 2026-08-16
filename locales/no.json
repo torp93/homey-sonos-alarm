@@ -62,6 +62,10 @@
     "createdButDeviceFailed": "Alarmen ble laget i Sonos, men enheten kunne ikke legges til: ",
     "addManually": "\nLegg den til via «Legg til en alarm som finnes».",
 
+    "presetDaily": "Hver dag",
+    "presetWeekdays": "Ukedager",
+    "presetWeekends": "Helg",
+
     "mon": "man",
     "tue": "tir",
     "wed": "ons",

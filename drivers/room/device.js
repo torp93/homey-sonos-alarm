@@ -30,6 +30,7 @@ class RoomDevice extends Homey.Device {
     this.homey.app.alarms.on('alarms', this._onAlarms);
 
     this.homey.app.refresh().catch((error) => this.error('Første henting feilet', error));
+    this._fillMissingSettings().catch((error) => this.error('Kunne ikke fylle standarder', error));
     this.log(`Rom ${this.roomUUID} initialisert`);
   }
 
@@ -37,8 +38,39 @@ class RoomDevice extends Homey.Device {
     if (this._onAlarms) this.homey.app.alarms.off('alarms', this._onAlarms);
   }
 
+  // Enheter som ble paret FØR disse innstillingene fantes, får dem ikke
+  // etterfylt av Homey. Da er feltene tomme på nettopp de enhetene som har
+  // vært der lengst, og «Opprett alarm» feiler på et tidspunkt som aldri ble satt.
+  async _fillMissingSettings() {
+    const defaults = {
+      newTime: '07:00',
+      newSource: 'Sonos chime',
+      newVolume: 30,
+      newMonday: true,
+      newTuesday: true,
+      newWednesday: true,
+      newThursday: true,
+      newFriday: true,
+      newSaturday: false,
+      newSunday: false,
+    };
+
+    const current = this.getSettings();
+    const missing = {};
+    for (const key of Object.keys(defaults)) {
+      if (current[key] === undefined || current[key] === null || current[key] === '') {
+        missing[key] = defaults[key];
+      }
+    }
+
+    if (Object.keys(missing).length === 0) return;
+    this.log('Fyller inn manglende standardinnstillinger:', Object.keys(missing).join(', '));
+    await this.setSettings(missing);
+  }
+
   async _createFromSettings() {
     const settings = this.getSettings();
+    this.log('Opprett alarm, innstillinger:', JSON.stringify(settings));
 
     const time = normalizeTime(settings.newTime);
     if (!time) {

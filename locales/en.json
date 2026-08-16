@@ -62,6 +62,10 @@
     "createdButDeviceFailed": "The alarm was created in Sonos, but the device could not be added: ",
     "addManually": "\nAdd it through \"Add an alarm that already exists\".",
 
+    "presetDaily": "Every day",
+    "presetWeekdays": "Weekdays",
+    "presetWeekends": "Weekends",
+
     "mon": "Mon",
     "tue": "Tue",
     "wed": "Wed",
