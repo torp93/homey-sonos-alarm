@@ -3,6 +3,7 @@
 const Homey = require('homey');
 const { discoverSpeakers } = require('../../lib/discovery');
 const { describeAlarm } = require('../../lib/alarm-name');
+const { describeSource } = require('../../lib/favorites');
 const { roomName } = require('../../lib/zone-topology');
 const { SETTING_HOST, isValidHost } = require('../../lib/speaker-config');
 
@@ -32,9 +33,13 @@ class AlarmDriver extends Homey.Driver {
       const sources = await this.homey.app.listSources();
       // Bare det visningen trenger: metadata-blobbene er store og har ingenting
       // i et nedtrekk å gjøre.
+      const language = this.homey.i18n.getLanguage();
       return sources.map((source) => ({
         id: source.id,
         title: source.title,
+        // Ferdig oversatt merkelapp: visningen skal ikke måtte kjenne
+        // kategorinøklene eller hvilket språk som gjelder.
+        label: describeSource(source, language),
         radio: source.radio,
       }));
     });
@@ -56,6 +61,9 @@ class AlarmDriver extends Homey.Driver {
     // Lager alarmen i Sonos og gir tilbake enhetsbeskrivelsen, slik at
     // visningen kan kalle Homey.createDevice og bli ferdig i én operasjon.
     session.setHandler('createAlarm', async (input) => {
+      // Logges ved inngangen: uten dette er «trykket på knappen, ingenting
+      // skjedde» umulig å skille fra «kallet kom aldri fram».
+      this.log('createAlarm fra paring:', JSON.stringify(input));
       const created = await this.homey.app.createAlarm(input);
       const client = await this.homey.app.getClient();
       // Samme oppslag som i lista, så en nylaget alarm heter det samme som en

@@ -56,12 +56,7 @@ class SonosAlarmApp extends Homey.App {
         durationMs: 5000,
         log: (...args) => this.log('[ssdp]', ...args),
       });
-      if (found.length === 0) {
-        throw new Error(
-          'Fant ingen Sonos-høyttalere på nettverket. '
-          + 'Sett adressen manuelt i appinnstillingene.',
-        );
-      }
+      if (found.length === 0) throw new Error(this.homey.__('error.noSpeakers'));
       address = await this._pickSpeaker(found);
     }
 
@@ -119,7 +114,7 @@ class SonosAlarmApp extends Homey.App {
   // Brukes av innstillingssiden og av paringen, slik at begge avviser en
   // adresse på samme grunnlag.
   async testSpeaker(host) {
-    if (!isValidHost(host)) throw new Error('Adressen ser ikke gyldig ut.');
+    if (!isValidHost(host)) throw new Error(this.homey.__('error.badAddress'));
     const client = new SonosClient({ host: String(host).trim(), timeoutMs: 6000 });
     const rooms = await client.listRooms();
     const alarms = await client.listAlarms();
@@ -163,7 +158,7 @@ class SonosAlarmApp extends Homey.App {
     const client = await this.getClient();
     const alarms = await client.listAlarms();
     const existing = alarms.find((alarm) => alarm.id === String(alarmId));
-    if (!existing) throw new Error(`Fant ingen alarm med ID ${alarmId}`);
+    if (!existing) throw new Error(`${this.homey.__('error.unknownAlarm')} ${alarmId}`);
 
     const updated = mergeAlarm(existing, changes);
     await client.updateAlarm(updated);

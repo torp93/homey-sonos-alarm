@@ -1,41 +1,41 @@
 <!--
   Steg 3a: lag en ny alarm.
 
-  Bare buzzer-alarmer kan lages fra bunnen — en musikkalarms kilde er bundet til
-  strømmekontoen og må velges i Sonos-appen. Derfor er det ingen kildevelger her.
+  Skrevet defensivt etter at en tidligere utgave feilet stille i paringsvinduet:
+  dagsknappene ble bygget i JavaScript, og da skriptet kastet der, forsvant ALT
+  som kom etter — knappene, volumlytteren og hentingen av rom. Symptomet var tre
+  urelaterte «feil» med én årsak, og ingen feilmelding noe sted. Derfor ligger
+  knappene i HTML, skriptet er ES5 i en egen funksjon, og window.onerror
+  skriver feilen synlig på siden.
 
-  Skrevet bevisst defensivt etter at en tidligere utgave feilet stille i
-  paringsvinduet: dagsknappene ble bygget i JavaScript, og da skriptet kastet
-  der, forsvant ALT som kom etter — knappene, volumlytteren og hentingen av rom.
-  Symptomet var tre urelaterte «feil» med én årsak, og ingen feilmelding noe sted.
-
-  Derfor nå: knappene ligger i HTML, skriptet er ES5 uten pilfunksjoner, spread
-  eller template-literaler, og window.onerror skriver feilen synlig på siden.
+  All tekst hentes fra locales/. Appen er engelsk med norsk som tilvalg.
 
   Homey injiserer homey.js selv — ikke legg den inn her.
 -->
 <style>
-  /* Ingen vannrett rulling uansett hva innholdet gjør: paringsvinduet er smalt,
-     og et element som stikker utenfor forskyver hele siden. */
   .sa { padding: 0 16px; line-height: 1.5; overflow-x: hidden; }
   .sa * { max-width: 100%; box-sizing: border-box; }
   .sa label { display: block; margin: 14px 0 4px; font-size: 0.9em; opacity: 0.75; }
-  .sa select, .sa input[type="time"] { width: 100%; box-sizing: border-box; padding: 9px 10px;
-              font-size: 1em; border: 1px solid rgba(128,128,128,0.4); border-radius: 6px;
+  .sa select, .sa input[type="time"] { width: 100%; padding: 9px 10px; font-size: 1em;
+              border: 1px solid rgba(128,128,128,0.4); border-radius: 6px;
               background: transparent; color: inherit; }
   /* Ramme og innvendig luft må IKKE gjelde skyveren: da tegnes sporet et annet
      sted enn der kontrollen ligger, og den ser fastlåst ut når man drar. */
-  .sa input[type="range"] { width: 100%; box-sizing: border-box; padding: 0; border: 0;
+  .sa input[type="range"] { width: 100%; padding: 0; border: 0;
               background: transparent; height: 30px; }
-  /* Grid, ikke flex. Med «flex: 1» fordeles ledig plass, men knappene krymper
-     ikke under sin egen tekstbredde — sju knapper ble bredere enn vinduet, og
-     «søn» havnet utenfor med vannrett rulling på hele siden. Sju like kolonner
-     tvinger dem inn uansett skjermbredde. */
+  /* Grid, ikke flex: med «flex: 1» krymper ikke knappene under tekstbredden,
+     og den sjuende havner utenfor skjermen. */
   .sa .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 6px; }
-  .sa .days button { min-width: 0; padding: 9px 2px; font-size: 0.8em; border-radius: 6px;
-              cursor: pointer; border: 1px solid rgba(128,128,128,0.4);
+  /* Flex i hver rute sentrerer teksten både vannrett og loddrett. Uten dette
+     satt dagene skjevt, siden knappene er smale og teksten ulik i bredde. */
+  .sa .days button { min-width: 0; height: 38px; padding: 0; font-size: 0.8em;
+              display: flex; align-items: center; justify-content: center;
+              text-align: center; border-radius: 6px; cursor: pointer;
+              border: 1px solid rgba(128,128,128,0.4);
               background: transparent; color: inherit; overflow: hidden; }
-  .sa .days button.on { background: #1D1D1D; border-color: #1D1D1D; color: #fff; }
+  /* Aksentblå, ikke nesten-svart: en mørk markering forsvinner i mørkt tema,
+     og da ser valgte dager ut som de ikke er valgt. */
+  .sa .days button.on { background: #1f8fff; border-color: #1f8fff; color: #fff; }
   .sa .buttons { display: flex; gap: 10px; margin-top: 20px; }
   .sa .buttons button { flex: 1; padding: 10px; font-size: 0.95em; border-radius: 6px;
               cursor: pointer; border: 1px solid rgba(128,128,128,0.4);
@@ -44,7 +44,7 @@
   .sa button[disabled] { opacity: 0.5; cursor: default; }
   .sa .small { margin-top: 6px; padding: 6px 10px; font-size: 0.82em; border-radius: 6px;
               cursor: pointer; border: 1px solid rgba(128,128,128,0.4);
-              background: transparent; color: inherit; }
+              background: transparent; color: inherit; width: auto; }
   .sa #result { margin-top: 16px; white-space: pre-wrap; font-size: 0.88em; }
   .sa #result.bad { color: #c0392b; }
   .sa #result.ok { color: #1a8a3c; }
@@ -53,46 +53,40 @@
 <div class="sa">
   <div id="result"></div>
 
-  <label for="room">Rom</label>
-  <select id="room"><option value="">Laster …</option></select>
-  <button id="reload" class="small" type="button">Hent rommene på nytt</button>
+  <label for="room" id="roomLabel"></label>
+  <select id="room"></select>
+  <button id="reload" class="small" type="button"></button>
 
-  <label for="source">Lyd</label>
-  <select id="source"><option value="buzzer">Sonos-tone</option></select>
+  <label for="source" id="soundLabel"></label>
+  <select id="source"></select>
 
-  <label for="time">Tidspunkt</label>
+  <label for="time" id="timeLabel"></label>
   <input id="time" type="time" value="07:00">
 
-  <label>Dager</label>
+  <label id="daysLabel"></label>
   <!-- Ligger i HTML, ikke bygget i JS: en feil i skriptet skal ikke kunne
-       etterlate en tom rad uten at noen skjønner hvorfor. data-day er Sonos sin
-       nummerering, der søndag er 0. -->
+       etterlate en tom rad. data-day er Sonos sin nummerering, søndag er 0. -->
   <div class="days" id="days">
-    <button type="button" class="on" data-day="1">man</button>
-    <button type="button" class="on" data-day="2">tir</button>
-    <button type="button" class="on" data-day="3">ons</button>
-    <button type="button" class="on" data-day="4">tor</button>
-    <button type="button" class="on" data-day="5">fre</button>
-    <button type="button" data-day="6">lør</button>
-    <button type="button" data-day="0">søn</button>
+    <button type="button" class="on" data-day="1" data-key="mon"></button>
+    <button type="button" class="on" data-day="2" data-key="tue"></button>
+    <button type="button" class="on" data-day="3" data-key="wed"></button>
+    <button type="button" class="on" data-day="4" data-key="thu"></button>
+    <button type="button" class="on" data-day="5" data-key="fri"></button>
+    <button type="button" data-day="6" data-key="sat"></button>
+    <button type="button" data-day="0" data-key="sun"></button>
   </div>
 
-  <label for="volume">Volum: <span id="volumeValue">30</span></label>
+  <label for="volume"><span id="volumeLabel"></span>: <span id="volumeValue">30</span></label>
   <input id="volume" type="range" min="0" max="100" step="1" value="30">
 
   <div class="buttons">
-    <button id="back" type="button">Tilbake</button>
-    <button id="create" class="primary" type="button">Lag alarmen</button>
+    <button id="back" type="button"></button>
+    <button id="create" class="primary" type="button"></button>
   </div>
 </div>
 
 <script type="application/javascript">
-// Homey laster paringsvisningene inn i SAMME dokument og bytter mellom dem, så
-// alt på toppnivå havner i ett felles globalt skop. Deklarerte to visninger
-// samme navn med const — her og i start.html het begge «resultEl» — kastet hele
-// skriptet med «Identifier has already been declared» før første linje kjørte.
-// Symptomet var at tre urelaterte ting så ødelagte ut samtidig, uten feilmelding.
-// Derfor kjører hver visning i sin egen funksjon.
+// Egen funksjon per visning: alle paringsvisningene deler ett globalt skop.
 (function () {
   var resultEl = document.getElementById('result');
 
@@ -102,46 +96,54 @@
     resultEl.className = cls || '';
   }
 
-  // Uten dette feiler siden stille, og tre ulike ting ser ødelagt ut samtidig
+  function t(key) { return Homey.__('pair.' + key); }
+
+  // Uten dette feiler siden stille, og flere ting ser ødelagte ut samtidig
   // uten at noen av dem er den egentlige feilen.
   window.onerror = function (message, source, line) {
-    show('Feil i paringsvinduet: ' + message + ' (linje ' + line + ')', 'bad');
+    show(t('scriptError') + message + ' (' + line + ')', 'bad');
     return false;
   };
 
-  try { Homey.setTitle('Ny alarm'); } catch (error) { /* pynt */ }
+  try { Homey.setTitle(t('newTitle')); } catch (error) { /* pynt */ }
 
   var roomEl = document.getElementById('room');
+  var sourceEl = document.getElementById('source');
   var timeEl = document.getElementById('time');
   var volumeEl = document.getElementById('volume');
   var volumeValueEl = document.getElementById('volumeValue');
   var createBtn = document.getElementById('create');
 
-  function showVolume() { volumeValueEl.textContent = volumeEl.value; }
-  volumeEl.addEventListener('input', showVolume);
-  volumeEl.addEventListener('change', showVolume);
+  document.getElementById('roomLabel').textContent = t('room');
+  document.getElementById('soundLabel').textContent = t('sound');
+  document.getElementById('timeLabel').textContent = t('time');
+  document.getElementById('daysLabel').textContent = t('days');
+  document.getElementById('volumeLabel').textContent = t('volume');
+  document.getElementById('reload').textContent = t('reloadRooms');
+  document.getElementById('back').textContent = t('back');
+  createBtn.textContent = t('create');
 
   var dayButtons = document.getElementById('days').getElementsByTagName('button');
 
   function bindDay(button) {
+    button.textContent = t(button.getAttribute('data-key'));
     button.addEventListener('click', function () {
       button.className = button.className === 'on' ? '' : 'on';
     });
   }
   for (var i = 0; i < dayButtons.length; i++) bindDay(dayButtons[i]);
 
-  function selectedDays() {
+  function showVolume() { volumeValueEl.textContent = volumeEl.value; }
+  volumeEl.addEventListener('input', showVolume);
+  volumeEl.addEventListener('change', showVolume);
+
+  // Samme regel som i lib/recurrence.js: alle sju dager er DAILY, ikke ON_0123456.
+  function recurrence() {
     var days = [];
     for (var j = 0; j < dayButtons.length; j++) {
       if (dayButtons[j].className === 'on') days.push(Number(dayButtons[j].getAttribute('data-day')));
     }
     days.sort(function (a, b) { return a - b; });
-    return days;
-  }
-
-  // Samme regel som i lib/recurrence.js: alle sju dager er DAILY, ikke ON_0123456.
-  function recurrence() {
-    var days = selectedDays();
     if (days.length === 0) return null;
     if (days.length === 7) return 'DAILY';
     return 'ON_' + days.join('');
@@ -151,13 +153,13 @@
 
   function loadRooms() {
     roomsLoaded = false;
-    roomEl.innerHTML = '<option value="">Laster …</option>';
+    roomEl.innerHTML = '<option value="">' + t('loading') + '</option>';
     show('', '');
 
     // Uten denne blir «Laster …» stående for alltid hvis kallet henger, og man
     // ser ingen forskjell på tregt og ødelagt.
     var timer = setTimeout(function () {
-      if (!roomsLoaded) show('Fikk ikke svar da rommene skulle hentes. Prøv igjen.', 'bad');
+      if (!roomsLoaded) show(t('noAnswer'), 'bad');
     }, 12000);
 
     Homey.emit('getRooms', null, function (error, rooms) {
@@ -165,10 +167,7 @@
       roomsLoaded = true;
       roomEl.innerHTML = '';
 
-      if (error) {
-        show('Kunne ikke hente rom: ' + (error.message || error), 'bad');
-        return;
-      }
+      if (error) { show(t('roomsFailed') + (error.message || error), 'bad'); return; }
       rooms = rooms || [];
       for (var k = 0; k < rooms.length; k++) {
         var option = document.createElement('option');
@@ -176,22 +175,25 @@
         option.textContent = rooms[k].name;
         roomEl.appendChild(option);
       }
-      if (rooms.length === 0) show('Fant ingen rom.', 'bad');
+      if (rooms.length === 0) show(t('noRoomsFound'), 'bad');
     });
   }
 
   // Kildene hentes ved siden av rommene. Feiler de, faller vi tilbake på den
   // innebygde tonen framfor å blokkere hele skjemaet.
   function loadSources() {
+    sourceEl.innerHTML = '<option value="buzzer">' + t('loading') + '</option>';
     Homey.emit('getSources', null, function (error, list) {
-      if (error || !list || list.length === 0) return;
-      var select = document.getElementById('source');
-      select.innerHTML = '';
-      for (var i = 0; i < list.length; i++) {
+      if (error || !list || list.length === 0) {
+        sourceEl.innerHTML = '<option value="buzzer">Sonos chime</option>';
+        return;
+      }
+      sourceEl.innerHTML = '';
+      for (var m = 0; m < list.length; m++) {
         var option = document.createElement('option');
-        option.value = list[i].id;
-        option.textContent = list[i].title + (list[i].radio ? '  (radio)' : '');
-        select.appendChild(option);
+        option.value = list[m].id;
+        option.textContent = list[m].label || list[m].title;
+        sourceEl.appendChild(option);
       }
     });
   }
@@ -206,11 +208,11 @@
 
   createBtn.addEventListener('click', function () {
     var repeat = recurrence();
-    if (!repeat) { show('Velg minst én dag.', 'bad'); return; }
-    if (!roomEl.value) { show('Velg et rom.', 'bad'); return; }
+    if (!repeat) { show(t('pickDay'), 'bad'); return; }
+    if (!roomEl.value) { show(t('pickRoom'), 'bad'); return; }
 
     createBtn.disabled = true;
-    show('Lager alarmen …', '');
+    show(t('creating'), '');
 
     Homey.emit('createAlarm', {
       roomUUID: roomEl.value,
@@ -218,22 +220,21 @@
       recurrence: repeat,
       volume: Number(volumeEl.value),
       enabled: true,
-      sourceId: document.getElementById('source').value || 'buzzer'
+      sourceId: sourceEl.value || 'buzzer'
     }, function (error, device) {
       if (error) {
         createBtn.disabled = false;
-        show('Kunne ikke lage alarmen: ' + (error.message || error), 'bad');
+        show(t('createFailed') + (error.message || error), 'bad');
         return;
       }
-      show('✓ Alarmen er laget.', 'ok');
+      show(t('created'), 'ok');
       Homey.createDevice(device, function (createError) {
         if (createError) {
           // Alarmen finnes nå i Sonos selv om Homey-enheten feilet. Å si det
           // høyt sparer brukeren for å lage den samme alarmen om igjen.
           createBtn.disabled = false;
-          show('Alarmen ble laget i Sonos, men enheten kunne ikke legges til: '
-             + (createError.message || createError)
-             + '\nLegg den til via «Legg til en alarm som finnes».', 'bad');
+          show(t('createdButDeviceFailed') + (createError.message || createError)
+             + t('addManually'), 'bad');
           return;
         }
         Homey.done();

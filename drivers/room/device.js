@@ -42,7 +42,7 @@ class RoomDevice extends Homey.Device {
 
     const time = normalizeTime(settings.newTime);
     if (!time) {
-      throw new Error(`«${settings.newTime}» er ikke et gyldig tidspunkt. Bruk formen 07:00.`);
+      throw new Error(`${this.homey.__('error.badTime')} ${settings.newTime}`);
     }
 
     const days = [
@@ -56,7 +56,7 @@ class RoomDevice extends Homey.Device {
     ].filter((day) => day !== null);
 
     const recurrence = daysToRecurrence(days);
-    if (!recurrence) throw new Error('Velg minst én dag i innstillingene.');
+    if (!recurrence) throw new Error(this.homey.__('error.noDays'));
 
     // Kilden skrives som tekst fordi nedtrekk i enhetsinnstillinger må
     // deklareres statisk, og favorittlista er ikke kjent på forhånd.
@@ -66,7 +66,7 @@ class RoomDevice extends Homey.Device {
       // Hele lista i feilmeldingen: brukeren skal slippe å gjette hva som er
       // gyldig når navnet ikke traff.
       const names = sources.map((candidate) => candidate.title).join(', ');
-      throw new Error(`Fant ingen lyd som heter «${settings.newSource}». Gyldige: ${names}`);
+      throw new Error(`${this.homey.__('error.unknownSource')} ${names}`);
     }
 
     const created = await this.homey.app.createAlarm({

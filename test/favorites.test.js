@@ -63,7 +63,7 @@ test('kildelista har den innebygde tonen først', () => {
   assert.strictEqual(sources[0].id, 'buzzer');
   assert.strictEqual(sources[0].uri, BUZZER_URI);
   assert.strictEqual(sources[0].metadata, '');
-  assert.strictEqual(sources[0].title, 'Sonos-tone');
+  assert.strictEqual(sources[0].title, 'Sonos chime');
 });
 
 test('kilder kan slås opp på id', () => {
@@ -87,10 +87,22 @@ test('merker radiostasjoner som radio', () => {
   assert.strictEqual(describeSource(radio), 'NRK mP3 (radio)');
 });
 
+test('generiske merkelapper oversettes, egennavn står', () => {
+  // Appen er engelsk med norsk som tilvalg. «Spotify» er et egennavn og skal
+  // se likt ut på begge språk; «playlist» er en kategori og oversettes.
+  const sources = allSources();
+  const playlist = sources.find((source) => source.title === 'FTS');
+  const starred = sources.find((source) => source.title === 'Starred');
+  assert.strictEqual(describeSource(playlist, 'en'), 'FTS (Sonos playlist)');
+  assert.strictEqual(describeSource(playlist, 'no'), 'FTS (Sonos-spilleliste)');
+  assert.strictEqual(describeSource(starred, 'en'), 'Starred (Spotify)');
+  assert.strictEqual(describeSource(starred, 'no'), 'Starred (Spotify)');
+});
+
 test('den innebygde tonen får ingen tjenestemerking', () => {
   const sources = allSources();
   assert.strictEqual(sources[0].service, '');
-  assert.strictEqual(describeSource(sources[0]), 'Sonos-tone');
+  assert.strictEqual(describeSource(sources[0]), 'Sonos chime');
 });
 
 test('kategorien utledes av URI, ikke av Sonos-beskrivelsen', () => {
@@ -98,7 +110,7 @@ test('kategorien utledes av URI, ikke av Sonos-beskrivelsen', () => {
   // spilleliste ga «Etter Eletro Is My Life Vip» — tittelen om igjen som støy.
   assert.strictEqual(serviceOf('x-rincon-cpcontainer:1006spotify%3Aplaylist%3Ax'), 'Spotify');
   assert.strictEqual(serviceOf('x-sonosapi-stream:r%3a401782?sid=268'), 'radio');
-  assert.strictEqual(serviceOf('x-sonos-http:track%3a634252554.mp3?sid=160'), 'musikk');
+  assert.strictEqual(serviceOf('x-sonos-http:track%3a634252554.mp3?sid=160'), 'music');
   assert.strictEqual(serviceOf('x-rincon-buzzer:0'), '');
 });
 
@@ -138,7 +150,7 @@ test('Sonos-spillelister kommer med, ikke bare favoritter', () => {
   const playlist = allSources().find((source) => source.title === 'FTS');
   assert.ok(playlist, 'FTS skal være en kilde');
   assert.strictEqual(playlist.uri, 'file:///jffs/settings/savedqueues.rsq#0');
-  assert.strictEqual(playlist.service, 'Sonos-spilleliste');
+  assert.strictEqual(playlist.service, 'playlist');
 });
 
 test('spillelistas metadata bygges som gyldig DIDL', () => {

@@ -1,4 +1,8 @@
 {
+  "0.10.0": {
+    "en": "English is now the default language, with Norwegian as a translation. Day buttons are centred and easier to read.",
+    "no": "Engelsk er nå standardspråk, med norsk som oversettelse. Dagsknappene er sentrert og lettere å lese."
+  },
   "0.9.0": {
     "en": "Sonos playlists can now be used as an alarm sound, not just favourites. Removed the redundant sound list from room device settings.",
     "no": "Sonos-spillelister kan nå brukes som alarmlyd, ikke bare favoritter. Fjernet den overflødige lydlista fra enhetsinnstillingene for rom."

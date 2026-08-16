@@ -1,10 +1,13 @@
 <!--
   Steg 2: legge til en alarm som finnes, eller lage en ny.
 
+  All tekst hentes fra locales/. Appen er engelsk med norsk som tilvalg.
+
   Homey injiserer homey.js selv — ikke legg den inn her.
 -->
 <style>
-  .sa { padding: 0 24px; line-height: 1.5; }
+  .sa { padding: 0 16px; line-height: 1.5; overflow-x: hidden; }
+  .sa * { max-width: 100%; box-sizing: border-box; }
   .sa p { margin: 0 0 18px; }
   .sa button { display: block; width: 100%; padding: 14px; margin-bottom: 12px;
                font-size: 0.95em; border-radius: 6px; cursor: pointer; text-align: left;
@@ -16,23 +19,31 @@
 </style>
 
 <div class="sa">
-  <p>Hva vil du gjøre?</p>
+  <p id="intro"></p>
 
   <button id="existing" class="primary">
-    <strong>Legg til en alarm som finnes</strong>
-    <span>Alarmene du allerede har satt opp i Sonos-appen</span>
+    <strong id="existingTitle"></strong>
+    <span id="existingHint"></span>
   </button>
 
   <button id="new">
-    <strong>Lag en ny alarm</strong>
-    <span>Med den innebygde alarmlyden</span>
+    <strong id="newTitle"></strong>
+    <span id="newHint"></span>
   </button>
 </div>
 
 <script type="application/javascript">
 // Egen funksjon per visning: alle paringsvisningene deler ett globalt skop.
 (function () {
-  try { Homey.setTitle('Legg til alarm'); } catch (error) { /* pynt */ }
+  function t(key) { return Homey.__('pair.' + key); }
+
+  try { Homey.setTitle(t('chooseTitle')); } catch (error) { /* pynt */ }
+
+  document.getElementById('intro').textContent = t('chooseIntro');
+  document.getElementById('existingTitle').textContent = t('chooseExisting');
+  document.getElementById('existingHint').textContent = t('chooseExistingHint');
+  document.getElementById('newTitle').textContent = t('chooseNew');
+  document.getElementById('newHint').textContent = t('chooseNewHint');
 
   document.getElementById('existing')
     .addEventListener('click', function () { Homey.showView('list_devices'); });

@@ -24,6 +24,7 @@ module.exports = {
   },
 
   async updateAlarm({ homey, body }) {
+    homey.app.log('updateAlarm fra innstillinger:', JSON.stringify(body));
     const changes = {};
     if (body.time) changes.startTime = body.time;
     if (body.recurrence) changes.recurrence = body.recurrence;
@@ -35,15 +36,19 @@ module.exports = {
 
   async listSources({ homey }) {
     // Uten uri og metadata: siden skal bare vise navnene, og blobbene er store.
+    const { describeSource } = require('./lib/favorites');
+    const language = homey.i18n.getLanguage();
     const sources = await homey.app.listSources();
     return sources.map((source) => ({
       id: source.id,
       title: source.title,
+      label: describeSource(source, language),
       radio: source.radio,
     }));
   },
 
   async createAlarm({ homey, body }) {
+    homey.app.log('createAlarm fra innstillinger:', JSON.stringify(body));
     const created = await homey.app.createAlarm({
       roomUUID: body.roomUUID,
       startTime: body.time,
