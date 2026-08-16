@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.15.1",
+  "version": "0.16.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -993,6 +993,49 @@
             "no": "Dager"
           },
           "children": [
+            {
+              "id": "daysPreset",
+              "type": "dropdown",
+              "label": {
+                "en": "Quick pick",
+                "no": "Hurtigvalg"
+              },
+              "hint": {
+                "en": "Sets the seven days below when you save, then goes back to Custom so it never overrides days you picked yourself.",
+                "no": "Setter de sju dagene nedenfor når du lagrer, og går så tilbake til Egendefinert — så den aldri overstyrer dager du har satt selv."
+              },
+              "value": "custom",
+              "values": [
+                {
+                  "id": "custom",
+                  "label": {
+                    "en": "Custom",
+                    "no": "Egendefinert"
+                  }
+                },
+                {
+                  "id": "daily",
+                  "label": {
+                    "en": "Every day",
+                    "no": "Hver dag"
+                  }
+                },
+                {
+                  "id": "weekdays",
+                  "label": {
+                    "en": "Weekdays",
+                    "no": "Ukedager"
+                  }
+                },
+                {
+                  "id": "weekends",
+                  "label": {
+                    "en": "Weekends",
+                    "no": "Helg"
+                  }
+                }
+              ]
+            },
             {
               "id": "newMonday",
               "type": "checkbox",

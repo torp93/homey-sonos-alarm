@@ -1,4 +1,8 @@
 {
+  "0.16.0": {
+    "en": "Room device settings have a quick pick for every day, weekdays and weekends, so the seven day fields do not have to be set one by one.",
+    "no": "Enhetsinnstillingene for rom har et hurtigvalg for hver dag, ukedager og helg, så de sju dagsfeltene ikke må settes ett for ett."
+  },
   "0.15.1": {
     "en": "The time field accepts 0700, 700, 7 and 07.30, not just 07:00.",
     "no": "Tidsfeltet godtar 0700, 700, 7 og 07.30, ikke bare 07:00."

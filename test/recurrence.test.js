@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 const {
-  isValidRecurrence, daysToRecurrence, recurrenceToDays, describeRecurrence,
+  isValidRecurrence, daysToRecurrence, recurrenceToDays, describeRecurrence, daysForPreset,
 } = require('../lib/recurrence');
 
 test('godtar nøkkelordene Sonos bruker', () => {
@@ -49,6 +49,34 @@ test('oversetter nøkkelord til dager, med søndag som 0', () => {
 test('tur-retur gjennom dager bevarer verdien', () => {
   assert.strictEqual(daysToRecurrence(recurrenceToDays('ON_135')), 'ON_135');
   assert.strictEqual(daysToRecurrence(recurrenceToDays('WEEKDAYS')), 'ON_12345');
+});
+
+test('hurtigvalgene gir riktige dager', () => {
+  assert.deepStrictEqual(daysForPreset('daily'), [0, 1, 2, 3, 4, 5, 6]);
+  assert.deepStrictEqual(daysForPreset('weekdays'), [1, 2, 3, 4, 5]);
+  assert.deepStrictEqual(daysForPreset('weekends'), [0, 6]);
+});
+
+test('custom og ukjente hurtigvalg gir null, ikke tomme dager', () => {
+  // Null betyr «rør ikke dagene». Tom liste ville tømt alle sju.
+  assert.strictEqual(daysForPreset('custom'), null);
+  assert.strictEqual(daysForPreset(''), null);
+  assert.strictEqual(daysForPreset(undefined), null);
+  assert.strictEqual(daysForPreset('tull'), null);
+});
+
+test('hurtigvalg kan ikke endres utenfra', () => {
+  // Returneres den interne lista direkte, kan en kaller mutere tabellen for
+  // alle senere oppslag.
+  const first = daysForPreset('weekdays');
+  first.push(6);
+  assert.deepStrictEqual(daysForPreset('weekdays'), [1, 2, 3, 4, 5]);
+});
+
+test('hurtigvalg og gjentakelse er enige med hverandre', () => {
+  assert.strictEqual(daysToRecurrence(daysForPreset('daily')), 'DAILY');
+  assert.strictEqual(daysToRecurrence(daysForPreset('weekdays')), 'ON_12345');
+  assert.strictEqual(daysToRecurrence(daysForPreset('weekends')), 'ON_06');
 });
 
 test('beskriver gjentakelse på begge språk', () => {

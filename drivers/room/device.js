@@ -5,7 +5,7 @@ const {
   alarmsForRoom, nextAlarm, describeRoom, formatTime, numberedList, alarmAtPosition,
 } = require('../../lib/room-summary');
 const { normalizeTime, findEquivalentAlarm } = require('../../lib/alarm-clock');
-const { daysToRecurrence } = require('../../lib/recurrence');
+const { daysToRecurrence, daysForPreset } = require('../../lib/recurrence');
 const { findSourceByTitle } = require('../../lib/favorites');
 
 class RoomDevice extends Homey.Device {
@@ -42,7 +42,7 @@ class RoomDevice extends Homey.Device {
     // Bare endringer i selve alarmen skal utløse noe. Uten dette ville en
     // endring av en helt urelatert innstilling skrevet til Sonos.
     const relevant = [
-      'newTime', 'newSource', 'newVolume', 'applyOnSave', 'deletePosition',
+      'newTime', 'newSource', 'newVolume', 'applyOnSave', 'deletePosition', 'daysPreset',
       'newMonday', 'newTuesday', 'newWednesday', 'newThursday',
       'newFriday', 'newSaturday', 'newSunday',
     ];
@@ -56,8 +56,34 @@ class RoomDevice extends Homey.Device {
     }, 500);
   }
 
+  // Dagsvalgene i settings er sju separate felt, så hurtigvalget må skrives om
+  // til dem før alarmen lages. Ellers ville opprettelsen brukt de gamle dagene.
+  async _applyDaysPreset(preset) {
+    const days = daysForPreset(preset);
+    if (!days) return;
+
+    const keys = ['newSunday', 'newMonday', 'newTuesday', 'newWednesday',
+      'newThursday', 'newFriday', 'newSaturday'];
+
+    const flags = {};
+    keys.forEach((key, day) => { flags[key] = days.includes(day); });
+
+    // Tilbake til «custom» med en gang: blir hurtigvalget stående, ville det
+    // overstyrt enkeltdager brukeren setter i neste lagring.
+    flags.daysPreset = 'custom';
+
+    this.log(`Hurtigvalg «${preset}» satte dagene ${days.join(', ')}`);
+    await this.setSettings(flags);
+  }
+
   async _applySettings(settings) {
     const deleting = settings.deletePosition && settings.deletePosition !== 'none';
+
+    // Før alt annet, så både opprettelse og visning bruker de nye dagene.
+    if (settings.daysPreset && settings.daysPreset !== 'custom') {
+      await this._applyDaysPreset(settings.daysPreset).catch((error) =>
+        this.error('Kunne ikke bruke hurtigvalget', error));
+    }
 
     if (deleting) {
       await this._deleteSelection(settings.deletePosition);
@@ -109,6 +135,8 @@ class RoomDevice extends Homey.Device {
   async _fillMissingSettings() {
     const defaults = {
       applyOnSave: true,
+      daysPreset: 'custom',
+      deletePosition: 'none',
       newTime: '07:00',
       newSource: 'Sonos chime',
       newVolume: 30,
