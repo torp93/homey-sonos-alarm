@@ -1,4 +1,8 @@
 {
+  "1.0.8": {
+    "en": "Both device types now show an alarm clock, with the room showing two to say it holds several alarms.",
+    "no": "Begge enhetstypene viser nå en vekkerklokke, og rommet viser to for å si at det holder flere alarmer."
+  },
   "1.0.7": {
     "en": "The app icon is the Sonos wordmark again.",
     "no": "Appikonet er Sonos-ordmerket igjen."
