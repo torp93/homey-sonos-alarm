@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -755,8 +755,8 @@
         {
           "type": "group",
           "label": {
-            "en": "New alarm",
-            "no": "Ny alarm"
+            "en": "New alarm — press Create alarm below to add it",
+            "no": "Ny alarm — trykk Opprett alarm nedenfor for å legge den til"
           },
           "children": [
             {
@@ -767,8 +767,8 @@
                 "no": "Tidspunkt"
               },
               "hint": {
-                "en": "24-hour clock, for example 07:00.",
-                "no": "24-timers klokke, for eksempel 07:00."
+                "en": "24-hour clock, for example 07:00. Saving only stores these values — the alarm is created when you press Create alarm.",
+                "no": "24-timers klokke, for eksempel 07:00. Lagre lagrer bare disse verdiene — alarmen opprettes når du trykker Opprett alarm."
               },
               "value": "07:00"
             },

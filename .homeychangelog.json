@@ -1,4 +1,8 @@
 {
+  "0.11.1": {
+    "en": "Room device settings now say plainly that saving only stores the values, and that the alarm is created by the Create alarm button.",
+    "no": "Enhetsinnstillingene for rom sier nå tydelig at lagring bare lagrer verdiene, og at alarmen opprettes med knappen Opprett alarm."
+  },
   "0.11.0": {
     "en": "Quick day presets when creating an alarm: every day, weekdays and weekends. Room devices added before the alarm template settings existed now get the default values filled in.",
     "no": "Hurtigvalg for dager når du oppretter en alarm: hver dag, ukedager og helg. Rom-enheter som ble lagt til før innstillingene fantes, får nå fylt inn standardverdiene."

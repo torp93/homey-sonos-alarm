@@ -34,6 +34,12 @@ class RoomDevice extends Homey.Device {
     this.log(`Rom ${this.roomUUID} initialisert`);
   }
 
+  // Logges for å kunne skille «lagret, men skjedde ingenting» fra «ble ikke
+  // lagret». Innstillingene er en mal — alarmen opprettes først av knappen.
+  async onSettings({ changedKeys }) {
+    this.log('Innstillinger lagret, endret:', changedKeys.join(', '));
+  }
+
   async onUninit() {
     if (this._onAlarms) this.homey.app.alarms.off('alarms', this._onAlarms);
   }
