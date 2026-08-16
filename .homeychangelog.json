@@ -1,4 +1,8 @@
 {
+  "0.19.0": {
+    "en": "New app images.",
+    "no": "Nye appbilder."
+  },
   "0.18.0": {
     "en": "Room devices can now be configured from a Repair view, where the sound is a real dropdown of your own favourites and playlists, with day presets and a volume slider.",
     "no": "Rom-enheter kan nå settes opp fra en Reparer-visning, der lyden er et ekte nedtrekk med dine egne favoritter og spillelister, med hurtigvalg for dager og en volumskyver."
