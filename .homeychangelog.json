@@ -1,4 +1,8 @@
 {
+  "1.3.0": {
+    "en": "The sound picker in the app settings works again, and the sound can now be changed on an alarm that already exists.",
+    "no": "Lydvelgeren i appinnstillingene virker igjen, og lyden kan nå endres på en alarm som allerede finnes."
+  },
   "1.2.0": {
     "en": "Create an alarm works in a normal flow, not only in Advanced Flow. It emitted a token, which Homey only allows in Advanced Flow.",
     "no": "«Opprett en alarm» virker i en vanlig flow, ikke bare i Advanced Flow. Kortet leverte et token, og Homey tillater det bare i Advanced Flow."

@@ -6,7 +6,7 @@ const { SonosClient } = require('./lib/sonos-client');
 const { discoverSpeakers } = require('./lib/discovery');
 const { daysToRecurrence, describeRecurrence } = require('./lib/recurrence');
 const { mergeAlarm, BUZZER_URI } = require('./lib/alarm-clock');
-const { findSource } = require('./lib/favorites');
+const { findSource, describeSource } = require('./lib/favorites');
 const {
   coordinatorHosts, coordinatorFor, listRooms, roomName,
 } = require('./lib/zone-topology');
@@ -262,6 +262,22 @@ class SonosAlarmApp extends Homey.App {
     return client.listRooms();
   }
 
+  // Kildene ferdig merket for et grensesnitt. Ligger her og ikke i api.js
+  // fordi appen har en `homey` med i18n; objektet et API-kall får inn er ikke
+  // det samme, og et oppslag der ga en tom liste i innstillingssiden mens
+  // reparasjonsvisningen — som går via driveren — virket.
+  async listSourcesForUi() {
+    const sources = await this.listSources();
+    const language = this.homey.i18n.getLanguage();
+
+    return sources.map((source) => ({
+      id: source.id,
+      title: source.title,
+      label: describeSource(source, language),
+      radio: source.radio,
+    }));
+  }
+
   async deleteAlarm(id) {
     const client = await this.getClient();
     await client.destroyAlarm(id);
@@ -297,6 +313,9 @@ class SonosAlarmApp extends Homey.App {
         recurrenceLabel: describeRecurrence(alarm.recurrence, language),
         roomUUID: alarm.roomUUID,
         roomName: roomName(topology, alarm.roomUUID),
+        // URI-en er kildens id i lista, så skjemaet kan forhåndsvelge riktig
+        // lyd når en alarm åpnes for endring.
+        sourceId: alarm.programURI,
         // Gruppering skjer på koordinatoren, ikke på RoomUUID: to alarmer i
         // samme rom kan peke på hver sin høyttaler i gruppen.
         groupUUID: coordinatorFor(topology, alarm.roomUUID),

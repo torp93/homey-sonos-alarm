@@ -30,21 +30,29 @@ module.exports = {
     if (body.recurrence) changes.recurrence = body.recurrence;
     if (body.volume !== undefined) changes.volume = Number(body.volume);
     if (body.duration) changes.duration = body.duration;
+
+    // Lydkilden kan byttes på en alarm som finnes. Hele blokka må skrives om,
+    // ikke bare URI-en — metadataen bærer tjenestereferansen, og en URI uten
+    // matchende metadata gir en alarm som ser riktig ut men er stum.
+    if (body.sourceId) {
+      const { findSource } = require('./lib/favorites');
+      const sources = await homey.app.listSources();
+      const source = findSource(sources, body.sourceId);
+      if (!source) throw new Error(`${homey.__('error.unknownSource')} ${body.sourceId}`);
+      changes.programURI = source.uri;
+      changes.programMetaData = source.metadata;
+      changes.playMode = source.radio || source.id === 'buzzer' ? 'NORMAL' : 'SHUFFLE';
+    }
+
     await homey.app.applyChange(body.id, changes);
     return { ok: true };
   },
 
   async listSources({ homey }) {
     // Uten uri og metadata: siden skal bare vise navnene, og blobbene er store.
-    const { describeSource } = require('./lib/favorites');
-    const language = homey.i18n.getLanguage();
-    const sources = await homey.app.listSources();
-    return sources.map((source) => ({
-      id: source.id,
-      title: source.title,
-      label: describeSource(source, language),
-      radio: source.radio,
-    }));
+    const sources = await homey.app.listSourcesForUi();
+    homey.app.log(`listSources: ${sources.length} kilde(r) til innstillingssiden`);
+    return sources;
   },
 
   async createAlarm({ homey, body }) {

@@ -186,7 +186,14 @@ function onHomeyReady(Homey) {
     // Kildene hentes ved siden av. Feiler de, skal alarmlista fortsatt vises —
     // man kan lese og slå av alarmer uten å kunne lage nye.
     Homey.api('GET', '/listSources', null, function (error, list) {
-      sources = error ? [] : (list || []);
+      if (error) {
+        // Feilet dette stille, sto lydvelgeren tom uten at noe forklarte
+        // hvorfor — og alarmlista ved siden av lastet helt fint.
+        sources = [];
+        show(t('error.noSourceList') + ' ' + error, 'bad');
+        return;
+      }
+      sources = list || [];
     });
   }
 
@@ -343,14 +350,25 @@ function onHomeyReady(Homey) {
     }
   }
 
-  function fillSources() {
+  function fillSources(selected) {
     var select = document.getElementById('f-source');
     select.innerHTML = '';
     for (var i = 0; i < sources.length; i++) {
       var option = document.createElement('option');
       option.value = sources[i].id;
       option.textContent = sources[i].label || sources[i].title;
+      if (selected && sources[i].id === selected) option.selected = true;
       select.appendChild(option);
+    }
+    // Alarmen kan spille noe som ikke lenger står blant favorittene — da er
+    // valget hverken i lista eller mulig å gjenskape, så det vises som det er
+    // framfor å bli stille byttet til den første i lista.
+    if (selected && !select.value) {
+      var current = document.createElement('option');
+      current.value = selected;
+      current.textContent = t('settings.music');
+      current.selected = true;
+      select.appendChild(current);
     }
     if (sources.length === 0) {
       var fallback = document.createElement('option');
@@ -370,20 +388,13 @@ function onHomeyReady(Homey) {
     showVolume();
     setDays(alarm ? alarm.recurrence : 'WEEKDAYS');
     fillRooms(alarm ? alarm.groupUUID : null);
-    fillSources();
+    fillSources(alarm ? alarm.sourceId : null);
 
-    // Rom og lyd låses på en alarm som finnes. Å bytte kilde krever at hele
-    // ProgramMetaData-blokka skrives på nytt, og en feil der gir en alarm som
-    // ser riktig ut men er stum. Slett og lag ny i stedet.
+    // Rommet låses på en alarm som finnes: Sonos knytter alarmen til en bestemt
+    // høyttaler, og å flytte den er en annen operasjon enn å endre innholdet.
+    // Lyden er derimot fri — den skrives om på samme måte som når en alarm
+    // oppdateres fra en rom-enhet, og den veien er verifisert.
     document.getElementById('f-room').disabled = !!alarm;
-    var sourceSelect = document.getElementById('f-source');
-    sourceSelect.disabled = !!alarm;
-    if (alarm) {
-      sourceSelect.innerHTML = '';
-      var current = document.createElement('option');
-      current.textContent = alarm.music ? t('settings.music') : t('settings.chime');
-      sourceSelect.appendChild(current);
-    }
     view('form');
   }
 
@@ -414,7 +425,8 @@ function onHomeyReady(Homey) {
         id: editingId,
         time: document.getElementById('f-time').value,
         recurrence: repeat,
-        volume: Number(volumeEl.value)
+        volume: Number(volumeEl.value),
+        sourceId: document.getElementById('f-source').value || undefined
       }, done);
     } else {
       Homey.api('POST', '/createAlarm', {
