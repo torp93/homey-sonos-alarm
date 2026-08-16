@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -615,17 +615,14 @@
           "no": "Slå på alle alarmer i et rom"
         },
         "titleFormatted": {
-          "en": "Turn on all alarms in [[room]]",
-          "no": "Slå på alle alarmer i [[room]]"
+          "en": "Turn on all alarms in [[device]]",
+          "no": "Slå på alle alarmer i [[device]]"
         },
         "args": [
           {
-            "name": "room",
-            "type": "autocomplete",
-            "title": {
-              "en": "Room",
-              "no": "Rom"
-            }
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=room"
           }
         ]
       },
@@ -636,17 +633,14 @@
           "no": "Slå av alle alarmer i et rom"
         },
         "titleFormatted": {
-          "en": "Turn off all alarms in [[room]]",
-          "no": "Slå av alle alarmer i [[room]]"
+          "en": "Turn off all alarms in [[device]]",
+          "no": "Slå av alle alarmer i [[device]]"
         },
         "args": [
           {
-            "name": "room",
-            "type": "autocomplete",
-            "title": {
-              "en": "Room",
-              "no": "Rom"
-            }
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=room"
           }
         ]
       },
@@ -657,8 +651,8 @@
           "no": "Slett alle alarmer i et rom"
         },
         "titleFormatted": {
-          "en": "Delete all alarms in [[room]]",
-          "no": "Slett alle alarmer i [[room]]"
+          "en": "Delete all alarms in [[device]]",
+          "no": "Slett alle alarmer i [[device]]"
         },
         "hint": {
           "en": "Permanently deletes the alarms. Sonos has no undo, and the alarms also disappear from the Sonos app. Homey devices for them become unavailable.",
@@ -666,12 +660,9 @@
         },
         "args": [
           {
-            "name": "room",
-            "type": "autocomplete",
-            "title": {
-              "en": "Room",
-              "no": "Rom"
-            }
+            "name": "device",
+            "type": "device",
+            "filter": "driver_id=room"
           }
         ]
       },

@@ -476,16 +476,21 @@ class SonosAlarmApp extends Homey.App {
         .map((room) => ({ name: room.name, id: room.uuid }));
     };
 
+    // Rom-kortene peker på en Sonos-rom-enhet, ikke på et navn fra en liste.
+    // Det gir dem driverens ikon — flow-kort uten enhet arver appikonet, og
+    // `icon` per kort ignoreres — og det er dessuten enheten brukeren allerede
+    // har lagt til. Enhetens data-id ER romets koordinator-UUID.
+    const roomOf = (device) => String(device.getData().id);
+
     const roomCards = [
-      ['sonos_alarm_enable_room', ({ room }) => this.setRoomEnabled(room.id, true)],
-      ['sonos_alarm_disable_room', ({ room }) => this.setRoomEnabled(room.id, false)],
-      ['sonos_alarm_delete_room', ({ room }) => this.deleteAlarmsInRoom(room.id, room.name)],
+      ['sonos_alarm_enable_room', ({ device }) => this.setRoomEnabled(roomOf(device), true)],
+      ['sonos_alarm_disable_room', ({ device }) => this.setRoomEnabled(roomOf(device), false)],
+      ['sonos_alarm_delete_room',
+        ({ device }) => this.deleteAlarmsInRoom(roomOf(device), device.getName())],
     ];
 
     for (const [id, run] of roomCards) {
-      const card = this.homey.flow.getActionCard(id);
-      card.registerArgumentAutocompleteListener('room', roomAutocomplete);
-      card.registerRunListener(run);
+      this.homey.flow.getActionCard(id).registerRunListener(run);
     }
 
     this.homey.flow

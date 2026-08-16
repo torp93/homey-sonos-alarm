@@ -1,4 +1,8 @@
 {
+  "1.1.0": {
+    "en": "The room flow cards now take a Sonos Room device instead of a room name. Existing flows using them need the room picked again.",
+    "no": "Rom-flowkortene tar nå en Sonos-rom-enhet i stedet for et romnavn. Flows som allerede bruker dem må få rommet valgt på nytt."
+  },
   "1.0.9": {
     "en": "Both device types show the same alarm clock.",
     "no": "Begge enhetstypene viser samme vekkerklokke."
