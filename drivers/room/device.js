@@ -34,10 +34,23 @@ class RoomDevice extends Homey.Device {
     this.log(`Rom ${this.roomUUID} initialisert`);
   }
 
-  // Logges for å kunne skille «lagret, men skjedde ingenting» fra «ble ikke
-  // lagret». Innstillingene er en mal — alarmen opprettes først av knappen.
-  async onSettings({ changedKeys }) {
+  async onSettings({ newSettings, changedKeys }) {
     this.log('Innstillinger lagret, endret:', changedKeys.join(', '));
+    if (newSettings.createNow !== true) return;
+
+    // Opprettelsen kjøres ETTER at Homey har lagret. Kaller man setSettings
+    // inne i onSettings, kaster Homey — derfor både opprettelsen og
+    // nullstillingen av krysset skjer i neste runde.
+    this.homey.setTimeout(() => {
+      this._createFromSettings()
+        .then(() => this.setSettings({ createNow: false }))
+        .catch((error) => {
+          this.error('Opprettelse fra innstillinger feilet', error);
+          // Krysset nullstilles uansett: står det igjen, lager neste lagring
+          // en alarm til uten at brukeren ba om det.
+          this.setSettings({ createNow: false }).catch(() => {});
+        });
+    }, 500);
   }
 
   async onUninit() {

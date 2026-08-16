@@ -1,6 +1,6 @@
 {
   "name": "com.thomastorp.sonos-alarm",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "private": true,
   "description": "Sonos alarms for Homey Pro, over the local UPnP AlarmClock service",
   "main": "app.js",

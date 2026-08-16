@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -754,8 +754,8 @@
         {
           "type": "group",
           "label": {
-            "en": "New alarm — press Create alarm below to add it",
-            "no": "Ny alarm — trykk Opprett alarm nedenfor for å legge den til"
+            "en": "New alarm",
+            "no": "Ny alarm"
           },
           "children": [
             {
@@ -766,8 +766,8 @@
                 "no": "Tidspunkt"
               },
               "hint": {
-                "en": "24-hour clock, for example 07:00. Saving only stores these values — the alarm is created when you press Create alarm.",
-                "no": "24-timers klokke, for eksempel 07:00. Lagre lagrer bare disse verdiene — alarmen opprettes når du trykker Opprett alarm."
+                "en": "24-hour clock, for example 07:00.",
+                "no": "24-timers klokke, for eksempel 07:00."
               },
               "value": "07:00"
             },
@@ -848,6 +848,19 @@
                   }
                 }
               ]
+            },
+            {
+              "id": "createNow",
+              "type": "checkbox",
+              "label": {
+                "en": "Create the alarm when saving",
+                "no": "Opprett alarmen når du lagrer"
+              },
+              "hint": {
+                "en": "Tick this and press Save. The alarm is added to this room with the values above, and the box clears itself so saving again does not create a duplicate.",
+                "no": "Kryss av og trykk Lagre. Alarmen legges til i dette rommet med verdiene over, og krysset fjerner seg selv så en ny lagring ikke lager en duplikat."
+              },
+              "value": false
             },
             {
               "id": "newVolume",
