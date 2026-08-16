@@ -1,4 +1,8 @@
 {
+  "1.0.0": {
+    "en": "First release. Set the alarms on your Sonos speakers from Homey and wake up to a radio station, a playlist or the built-in chime. Alarms can be created, changed and deleted from the app, from a room, or from a flow, and a whole room can be switched on or off at once.",
+    "no": "Første utgivelse. Still alarmene på Sonos-høyttalerne dine fra Homey og våkne til en radiostasjon, en spilleliste eller den innebygde tonen. Alarmer kan opprettes, endres og slettes fra appen, fra et rom, eller fra en flow, og et helt rom kan slås av eller på samtidig."
+  },
   "0.19.0": {
     "en": "New app images.",
     "no": "Nye appbilder."
