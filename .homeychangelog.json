@@ -1,4 +1,8 @@
 {
+  "1.2.0": {
+    "en": "Create an alarm works in a normal flow, not only in Advanced Flow. It emitted a token, which Homey only allows in Advanced Flow.",
+    "no": "«Opprett en alarm» virker i en vanlig flow, ikke bare i Advanced Flow. Kortet leverte et token, og Homey tillater det bare i Advanced Flow."
+  },
   "1.1.1": {
     "en": "Fixes the room flow cards showing a raw placeholder instead of the room, and separates their titles from the cards that act on every room.",
     "no": "Retter at rom-flowkortene viste en rå plassholder i stedet for rommet, og skiller titlene deres fra kortene som gjelder alle rom."

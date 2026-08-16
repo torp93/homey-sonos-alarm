@@ -443,8 +443,11 @@ class SonosAlarmApp extends Homey.App {
         }));
     });
 
+    // Ingen tokens ut: et handlingskort som leverer tokens er låst til Advanced
+    // Flow, og kortet skal kunne brukes i en vanlig flow også. ID-en logges i
+    // stedet, så den finnes hvis noe skal spores.
     create.registerRunListener(async ({ room, time, recurrence, volume, source }) => {
-      const created = await this.createAlarm({
+      await this.createAlarm({
         roomUUID: room.id,
         startTime: time,
         recurrence,
@@ -454,8 +457,6 @@ class SonosAlarmApp extends Homey.App {
         // som er det folk forventer av «alarm».
         sourceId: source ? source.id : 'buzzer',
       });
-      // Tokens ut igjen, så en flow kan slå av eller slette alarmen den lagde.
-      return { alarm_id: created.id };
     });
 
     this.homey.flow

@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -582,16 +582,6 @@
             "title": {
               "en": "Sound",
               "no": "Lyd"
-            }
-          }
-        ],
-        "tokens": [
-          {
-            "name": "alarm_id",
-            "type": "string",
-            "title": {
-              "en": "Alarm ID",
-              "no": "Alarm-ID"
             }
           }
         ]
