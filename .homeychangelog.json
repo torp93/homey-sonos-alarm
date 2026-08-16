@@ -1,4 +1,8 @@
 {
+  "1.0.5": {
+    "en": "New brand colour.",
+    "no": "Ny merkefarge."
+  },
   "1.0.4": {
     "en": "The flow cards that act on a room or the whole household now carry the alarm clock icon like the rest, instead of falling back to the app icon.",
     "no": "Flow-kortene som gjelder et rom eller hele husholdningen bærer nå vekkerklokke-ikonet som de andre, i stedet for å falle tilbake på appikonet."
