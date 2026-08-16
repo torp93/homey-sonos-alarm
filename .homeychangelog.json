@@ -1,4 +1,8 @@
 {
+  "1.0.4": {
+    "en": "The flow cards that act on a room or the whole household now carry the alarm clock icon like the rest, instead of falling back to the app icon.",
+    "no": "Flow-kortene som gjelder et rom eller hele husholdningen bærer nå vekkerklokke-ikonet som de andre, i stedet for å falle tilbake på appikonet."
+  },
   "1.0.3": {
     "en": "Removes the leftover Create alarm button from room devices that already had it. Removing a capability from the app does not remove it from devices, so pressing it reported a missing listener.",
     "no": "Fjerner den gjenglemte «Opprett alarm»-knappen fra rom-enheter som allerede hadde den. Å fjerne en capability fra appen fjerner den ikke fra enhetene, så et trykk meldte om manglende lytter."

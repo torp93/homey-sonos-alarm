@@ -1,6 +1,6 @@
 {
   "id": "com.thomastorp.sonos-alarm",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "compatibility": ">=12.2.0",
   "sdk": 3,
   "platforms": [
@@ -594,7 +594,8 @@
               "no": "Alarm-ID"
             }
           }
-        ]
+        ],
+        "icon": "/drivers/alarm/assets/icon.svg"
       },
       {
         "id": "sonos_alarm_enable_all",
@@ -606,7 +607,8 @@
           "en": "Enables every Sonos alarm in the household, including alarms that have not been added to Homey.",
           "no": "Aktiverer alle Sonos-alarmer i husholdningen, også alarmer som ikke er lagt til i Homey."
         },
-        "args": []
+        "args": [],
+        "icon": "/drivers/alarm/assets/icon.svg"
       },
       {
         "id": "sonos_alarm_enable_room",
@@ -627,7 +629,8 @@
               "no": "Rom"
             }
           }
-        ]
+        ],
+        "icon": "/drivers/alarm/assets/icon.svg"
       },
       {
         "id": "sonos_alarm_disable_room",
@@ -648,7 +651,8 @@
               "no": "Rom"
             }
           }
-        ]
+        ],
+        "icon": "/drivers/alarm/assets/icon.svg"
       },
       {
         "id": "sonos_alarm_delete_room",
@@ -673,7 +677,8 @@
               "no": "Rom"
             }
           }
-        ]
+        ],
+        "icon": "/drivers/alarm/assets/icon.svg"
       },
       {
         "id": "sonos_alarm_delete_all",
@@ -685,7 +690,8 @@
           "en": "Permanently deletes every alarm in the household. Sonos has no undo. Be careful what triggers this.",
           "no": "Sletter alle alarmer i husholdningen for godt. Sonos har ingen angremulighet. Vær forsiktig med hva som trigger dette."
         },
-        "args": []
+        "args": [],
+        "icon": "/drivers/alarm/assets/icon.svg"
       },
       {
         "id": "sonos_alarm_disable_all",
@@ -697,7 +703,8 @@
           "en": "Disables every Sonos alarm in the household, including alarms that have not been added to Homey.",
           "no": "Deaktiverer alle Sonos-alarmer i husholdningen, også alarmer som ikke er lagt til i Homey."
         },
-        "args": []
+        "args": [],
+        "icon": "/drivers/alarm/assets/icon.svg"
       }
     ],
     "conditions": [
