@@ -8,17 +8,31 @@ const { daysToRecurrence, describeRecurrence } = require('./lib/recurrence');
 const { mergeAlarm, BUZZER_URI } = require('./lib/alarm-clock');
 const { findSource, describeSource } = require('./lib/favorites');
 const {
-  coordinatorHosts, coordinatorFor, listRooms, roomName,
+  coordinatorHosts, coordinatorFor, ownerOf, knowsRoom, listRooms, roomName,
 } = require('./lib/zone-topology');
 const {
   SETTING_HOST, SETTING_POLL, isValidHost, resolveHost, resolvePollSeconds, sortHosts,
 } = require('./lib/speaker-config');
 
+// Hvor mange hentinger på rad som må feile før vi mistenker at adressen er gal
+// og ikke at nettet hikket. Klienten er bufret for appens levetid, så en
+// høyttaler som har fått ny IP av DHCP — eller er byttet ut — ville ellers gjort
+// appen stille helt til noen startet den på nytt. Tre runder rir av et enkelt
+// hikk, og ved standard polling er det seks minutter før vi leter på nytt.
+const FAILURES_BEFORE_REDISCOVERY = 3;
+
 class SonosAlarmApp extends Homey.App {
   async onInit() {
     this._client = null;
+    this._clientPromise = null;
     this._host = null;
     this._timer = null;
+    this._failures = 0;
+    // Alle skrivinger går i én kø, og hver publisering merkes med rekkefølgen
+    // lesningen startet i. Se _write() og _publish().
+    this._writes = Promise.resolve();
+    this._seq = 0;
+    this._published = 0;
     this._topologyXml = null;
     this._topologyAt = 0;
     // Enhetene lytter her i stedet for å polle hver for seg. Med én alarm per
@@ -48,6 +62,19 @@ class SonosAlarmApp extends Homey.App {
   async getClient() {
     if (this._client) return this._client;
 
+    // Oppslaget kan ta sekunder — SSDP alene bruker fem. Uten å huske på det
+    // pågående forsøket startet hver enhet sitt eget søk ved oppstart: sju
+    // enheter ga sju parallelle SSDP-skanninger og sju klienter der seks ble
+    // kastet. Alle som spør venter derfor på det samme svaret.
+    if (!this._clientPromise) {
+      this._clientPromise = this._connect()
+        .finally(() => { this._clientPromise = null; });
+    }
+
+    return this._clientPromise;
+  }
+
+  async _connect() {
     const { host, source } = resolveHost(this.homey.settings);
     let address = host;
 
@@ -67,6 +94,28 @@ class SonosAlarmApp extends Homey.App {
     });
     this.log(`Klient opprettet mot ${address} (${source})`);
     return this._client;
+  }
+
+  // Alle skrivinger går gjennom denne køen. To flow-kort som endret samme alarm
+  // samtidig leste begge den gamle tilstanden og skrev hver sin fulle struktur,
+  // og den ene endringen forsvant sporløst. Sekvensiell skriving fjerner
+  // dessuten de sporadiske 402-ene Sonos gir når to UpdateAlarm treffer likt.
+  _write(task) {
+    const run = this._writes.then(() => task());
+    // Kjeden må overleve en feilet skriving, ellers ville én feil stanset alle
+    // senere skrivinger for resten av appens levetid.
+    this._writes = run.then(() => {}, () => {});
+    return run;
+  }
+
+  // Publisering merket med rekkefølgen lesningen startet i. En polling som
+  // begynte før en skriving kan ellers komme tilbake etterpå og kringkaste den
+  // gamle tilstanden: brytaren spretter tilbake i appen, og Homey fyrer et
+  // flow-kort på en endring som aldri skjedde.
+  _publish(alarms, seq) {
+    if (seq < this._published) return;
+    this._published = seq;
+    this.alarms.emit('alarms', alarms);
   }
 
   // SSDP svarer i tilfeldig rekkefølge, og blant svarerne er bundne suber og
@@ -99,16 +148,25 @@ class SonosAlarmApp extends Homey.App {
     return this._host;
   }
 
+  // Kalles både når brukeren endrer adressen og når høyttaleren har sluttet å
+  // svare. Begge tilfellene krever det samme: glem alt som hørte til den gamle
+  // adressen, og la neste kall finne veien på nytt.
   resetClient() {
     this._client = null;
+    // Et pågående oppslag hører til den gamle adressen og skal ikke bli svaret
+    // på neste forespørsel.
+    this._clientPromise = null;
     this._host = null;
+    // Nullstilles her også, ellers ville telleren stått over grensen og utløst
+    // en ny gjenoppdagelse ved hver eneste feil etterpå.
+    this._failures = 0;
     // Topologien og favorittene hører til den gamle høyttaleren og kan være fra
     // et annet anlegg hvis adressen ble endret.
     this._topologyXml = null;
     this._topologyAt = 0;
     this._sources = null;
     this._sourcesAt = 0;
-    this.log('Adresse endret — klienten bygges på nytt ved neste kall');
+    this.log('Klienten bygges på nytt ved neste kall');
   }
 
   // Brukes av innstillingssiden og av paringen, slik at begge avviser en
@@ -143,10 +201,31 @@ class SonosAlarmApp extends Homey.App {
   }
 
   async refresh() {
-    const client = await this.getClient();
-    const alarms = await client.listAlarms();
-    this.alarms.emit('alarms', alarms);
-    return alarms;
+    const seq = this._seq + 1;
+    this._seq = seq;
+
+    try {
+      const client = await this.getClient();
+      const alarms = await client.listAlarms();
+      this._failures = 0;
+      this._publish(alarms, seq);
+      return alarms;
+    } catch (error) {
+      this._failures += 1;
+
+      // Bare lesing gjenopptas slik. Skrivinger prøves aldri på nytt av seg
+      // selv: CreateAlarm og DestroyAlarm er ikke idempotente, og et svar som
+      // forsvant på veien betyr ikke at kallet ikke traff.
+      if (this._failures >= FAILURES_BEFORE_REDISCOVERY && this._client) {
+        this.error(
+          `${this._failures} hentinger på rad feilet mot ${this._host}`
+          + ' — finner høyttaleren på nytt ved neste forsøk',
+        );
+        this.resetClient();
+      }
+
+      throw error;
+    }
   }
 
   // ---- endringer ----
@@ -156,17 +235,26 @@ class SonosAlarmApp extends Homey.App {
   // nullstilles f.eks. lydkilden når man bare ville flytte tidspunktet.
   async applyChange(alarmId, changes) {
     const client = await this.getClient();
-    const alarms = await client.listAlarms();
-    const existing = alarms.find((alarm) => alarm.id === String(alarmId));
-    if (!existing) throw new Error(`${this.homey.__('error.unknownAlarm')} ${alarmId}`);
 
-    const updated = mergeAlarm(existing, changes);
-    await client.updateAlarm(updated);
+    // Hele les–slå sammen–skriv ligger inne i køen. Skjedde lesningen utenfor,
+    // kunne to samtidige kort begge lese den gamle alarmen og skrive hver sin
+    // fulle struktur oppå hverandre.
+    const { updated, alarms, seq } = await this._write(async () => {
+      const current = await client.listAlarms();
+      const existing = current.find((alarm) => alarm.id === String(alarmId));
+      if (!existing) throw new Error(`${this.homey.__('error.unknownAlarm')} ${alarmId}`);
+
+      const next = mergeAlarm(existing, changes);
+      this._seq += 1;
+      await client.updateAlarm(next);
+      return { updated: next, alarms: current, seq: this._seq };
+    });
+
     this.log(`Alarm ${alarmId} oppdatert`, changes);
 
     // Nye verdier ut til enhetene med en gang, i stedet for å vente på neste
     // polling — ellers spretter brytaren tilbake i appen.
-    this.alarms.emit('alarms', alarms.map((a) => (a.id === updated.id ? updated : a)));
+    this._publish(alarms.map((a) => (a.id === updated.id ? updated : a)), seq);
     return updated;
   }
 
@@ -197,7 +285,7 @@ class SonosAlarmApp extends Homey.App {
     const source = findSource(await this.listSources(), sourceId);
     if (!source) throw new Error(`${this.homey.__('error.unknownSource')} ${sourceId}`);
 
-    const created = await client.createAlarm({
+    const created = await this._write(() => client.createAlarm({
       startTime,
       duration,
       recurrence,
@@ -210,7 +298,7 @@ class SonosAlarmApp extends Homey.App {
       playMode: source.uri === BUZZER_URI || source.radio ? 'NORMAL' : 'SHUFFLE',
       volume,
       includeLinkedZones: false,
-    });
+    }));
 
     this.log(
       `Alarm ${created.id} opprettet ${created.startTime} (${created.recurrence})`
@@ -237,7 +325,7 @@ class SonosAlarmApp extends Homey.App {
     // husholdningsliste, og samtidige skriv gir sporadiske 402-er.
     for (const alarm of targets) {
       try {
-        await client.updateAlarm({ ...alarm, enabled });
+        await this._write(() => client.updateAlarm({ ...alarm, enabled }));
       } catch (error) {
         failed.push(alarm.id);
         this.error(`Kunne ikke sette alarm ${alarm.id}`, error);
@@ -247,9 +335,12 @@ class SonosAlarmApp extends Homey.App {
     await this.refresh().catch((error) => this.error('Henting etter endring feilet', error));
 
     if (failed.length > 0) {
+      // Teksten havner rett i flow-kortets feilmelding i Homey-appen, så den må
+      // gjennom oversettelsen. Antallet sier hvor mye som faktisk gikk gjennom
+      // — «feilet» alene ville skjult at de fleste ble endret.
       throw new Error(
-        `${targets.length - failed.length} av ${targets.length} alarmer endret. `
-        + `Feilet: ${failed.join(', ')}`,
+        `${this.homey.__('error.partial')} ${failed.join(', ')}`
+        + ` (${targets.length - failed.length}/${targets.length})`,
       );
     }
 
@@ -280,7 +371,7 @@ class SonosAlarmApp extends Homey.App {
 
   async deleteAlarm(id) {
     const client = await this.getClient();
-    await client.destroyAlarm(id);
+    await this._write(() => client.destroyAlarm(id));
     this.log(`Alarm ${id} slettet`);
     // Enheten som pekte hit blir utilgjengelig ved neste runde, ikke slettet.
     // Å fjerne brukerens Homey-enhet automatisk ville tatt med seg flowene den
@@ -336,20 +427,31 @@ class SonosAlarmApp extends Homey.App {
     return this._topologyXml;
   }
 
-  // Hvilken gruppe en UUID hører til. Rom-enhetene bruker den for å samle sine
-  // egne alarmer, siden en alarm gjerne peker på en satellitt.
-  async coordinatorResolver() {
+  // Hvilken høyttaler en UUID hører til. Rom-enhetene bruker den for å samle
+  // sine egne alarmer, siden en alarm gjerne peker på en satellitt.
+  //
+  // Tidligere gikk dette via koordinatoren. Det brast så snart to rom ble
+  // gruppert i Sonos-appen: da fikk de én felles koordinator, det ene rommet
+  // overtok det andres alarmer, og «slett alarmene i dette rommet» slettet
+  // naboens også.
+  async roomResolver() {
     const xml = await this.getTopology();
-    return (uuid) => coordinatorFor(xml, uuid);
+    return (uuid) => ownerOf(xml, uuid);
   }
 
-  // Alarmene i ett rom. Tilhørighet avgjøres av hvilken gruppe UUID-en ligger
-  // i, ikke av likhet — en alarm peker gjerne på en satellitt.
-  async alarmsInRoom(coordinatorUUID) {
+  // Om topologien kjenner rommet i det hele tatt. Skiller «rommet er borte fra
+  // svaret akkurat nå» fra «rommet har ingen alarmer».
+  async knowsRoom(uuid) {
+    return knowsRoom(await this.getTopology(), uuid);
+  }
+
+  // Alarmene i ett rom. Tilhørighet avgjøres av hvilken høyttaler UUID-en hører
+  // til, ikke av likhet — en alarm peker gjerne på en satellitt.
+  async alarmsInRoom(roomUUID) {
     const client = await this.getClient();
-    const resolve = await this.coordinatorResolver();
+    const resolve = await this.roomResolver();
     const alarms = await client.listAlarms();
-    return alarms.filter((alarm) => resolve(alarm.roomUUID) === coordinatorUUID);
+    return alarms.filter((alarm) => resolve(alarm.roomUUID) === roomUUID);
   }
 
   // Sletting kan ikke angres — Sonos har ingen papirkurv. Antallet logges og
@@ -361,7 +463,7 @@ class SonosAlarmApp extends Homey.App {
     // Sekvensielt: samtidige skriv mot samme husholdningsliste gir sporadiske 402-er.
     for (const alarm of alarms) {
       try {
-        await client.destroyAlarm(alarm.id);
+        await this._write(() => client.destroyAlarm(alarm.id));
         this.log(`Alarm ${alarm.id} (${alarm.startTime}) slettet`);
       } catch (error) {
         failed.push(alarm.id);
@@ -372,9 +474,11 @@ class SonosAlarmApp extends Homey.App {
     await this.refresh().catch((error) => this.error('Henting etter sletting feilet', error));
 
     if (failed.length > 0) {
+      // `what` blir stående i loggen, ikke i feilmeldingen: den er et internt
+      // navn på omfanget og finnes ikke oversatt.
       throw new Error(
-        `${alarms.length - failed.length} av ${alarms.length} alarmer slettet fra ${what}. `
-        + `Feilet: ${failed.join(', ')}`,
+        `${this.homey.__('error.partialDelete')} ${failed.join(', ')}`
+        + ` (${alarms.length - failed.length}/${alarms.length})`,
       );
     }
 
@@ -391,17 +495,35 @@ class SonosAlarmApp extends Homey.App {
     return this.deleteAlarms(await client.listAlarms(), 'hele husholdningen');
   }
 
-  async setRoomEnabled(coordinatorUUID, enabled) {
+  async setRoomEnabled(roomUUID, enabled) {
     const client = await this.getClient();
-    const resolve = await this.coordinatorResolver();
+    const resolve = await this.roomResolver();
     const alarms = await client.listAlarms();
-    const mine = alarms.filter((alarm) => resolve(alarm.roomUUID) === coordinatorUUID);
+    const mine = alarms.filter((alarm) => resolve(alarm.roomUUID) === roomUUID);
+    const targets = mine.filter((alarm) => alarm.enabled !== enabled);
 
-    for (const alarm of mine.filter((alarm) => alarm.enabled !== enabled)) {
-      await client.updateAlarm({ ...alarm, enabled });
+    // Samme mønster som setAllEnabled. Uten det stanset løkka på den første
+    // feilen: resten av rommet ble aldri forsøkt, hentingen under ble hoppet
+    // over, og enheten sto igjen med verdier som ikke stemte med høyttaleren.
+    const failed = [];
+    for (const alarm of targets) {
+      try {
+        await this._write(() => client.updateAlarm({ ...alarm, enabled }));
+      } catch (error) {
+        failed.push(alarm.id);
+        this.error(`Kunne ikke sette alarm ${alarm.id}`, error);
+      }
     }
 
     await this.refresh().catch((error) => this.error('Henting etter romendring feilet', error));
+
+    if (failed.length > 0) {
+      throw new Error(
+        `${this.homey.__('error.partial')} ${failed.join(', ')}`
+        + ` (${targets.length - failed.length}/${targets.length})`,
+      );
+    }
+
     return mine.length;
   }
 

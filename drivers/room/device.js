@@ -35,6 +35,9 @@ class RoomDevice extends Homey.Device {
     // pekt på feil alarm uten å si fra. Presisjonen ligger i alarm-enhetene.
     this.registerCapabilityListener('onoff', async (value) => {
       const count = await this.homey.app.setRoomEnabled(this.roomUUID, value === true);
+      // Uten alarmer er det ingenting å slå på, og brytaren ville sprettet
+      // tilbake ved neste polling uten å si hvorfor. En feil er ærligere.
+      if (count === 0) throw new Error(this.homey.__('error.roomEmpty'));
       this.log(`${count} alarm(er) i rommet satt til ${value ? 'på' : 'av'}`);
     });
 
@@ -117,6 +120,10 @@ class RoomDevice extends Homey.Device {
         return;
       }
 
+      // Slettingen er gjort, og «bruk når du lagrer» slås på igjen. Ble den
+      // stående av, gjorde neste lagring stille ingenting — brukeren endret
+      // tidspunktet, trykket lagre, og ingen alarm ble laget.
+      await this.setSettings({ applyOnSave: true }).catch(() => {});
       await this.unsetWarning().catch(() => {});
       return;
     }
@@ -135,7 +142,7 @@ class RoomDevice extends Homey.Device {
   }
 
   async _deleteSelection(selection) {
-    const resolve = await this.homey.app.coordinatorResolver();
+    const resolve = await this.homey.app.roomResolver();
     const client = await this.homey.app.getClient();
     // Lista leses på nytt her, ikke fra det etiketten viste. Er en alarm
     // slettet i mellomtiden, peker plassen på noe annet.
@@ -162,7 +169,20 @@ class RoomDevice extends Homey.Device {
   }
 
   async onUninit() {
-    if (this._onAlarms) this.homey.app.alarms.off('alarms', this._onAlarms);
+    this._detach();
+  }
+
+  // onUninit dekker at appen stopper. Sletter brukeren enheten, er det
+  // onDeleted som kommer — og uten denne ble lytteren stående igjen og skrev
+  // til en enhet som ikke finnes lenger, så lenge appen kjørte.
+  async onDeleted() {
+    this._detach();
+  }
+
+  _detach() {
+    if (!this._onAlarms) return;
+    this.homey.app.alarms.off('alarms', this._onAlarms);
+    this._onAlarms = null;
   }
 
   // Enheter som ble paret FØR disse innstillingene fantes, får dem ikke
@@ -247,7 +267,7 @@ class RoomDevice extends Homey.Device {
     // opprettelsen være idempotent: uten dette ville hver volumjustering blitt
     // en ny alarm i stedet for en endring av den som allerede finnes.
     const client = await this.homey.app.getClient();
-    const resolve = await this.homey.app.coordinatorResolver();
+    const resolve = await this.homey.app.roomResolver();
     const existing = findEquivalentAlarm(
       await client.listAlarms(),
       { startTime: time, recurrence, programURI: source.uri },
@@ -283,11 +303,25 @@ class RoomDevice extends Homey.Device {
   }
 
   async _apply(alarms) {
-    const resolve = await this.homey.app.coordinatorResolver();
+    // Er rommet borte fra topologien akkurat nå — midt i en omstart, eller i et
+    // halvferdig svar — vet vi ikke hvilke alarmer som hører til det. Å skrive
+    // «ingen alarmer» da ville slått av brytaren og fyrt et flow-kort på en
+    // endring som aldri skjedde.
+    if (!await this.homey.app.knowsRoom(this.roomUUID)) {
+      this.log('Rommet finnes ikke i topologien akkurat nå — beholder verdiene');
+      await this.setUnavailable(this.homey.__('error.roomMissing')).catch(() => {});
+      return;
+    }
+    await this.setAvailable().catch(() => {});
+
+    const resolve = await this.homey.app.roomResolver();
     const mine = alarmsForRoom(alarms, resolve, this.roomUUID);
 
     const language = this.homey.i18n.getLanguage();
-    const next = nextAlarm(mine, new Date());
+    // Sonos-tidspunkter er veggklokke i husstandens sone, mens appen kjører med
+    // TZ=UTC. Uten Homeys egen sone ville «neste alarm» regnet i UTC og lagt
+    // alarmen på feil ukedag for alt som ligger nær midnatt.
+    const next = nextAlarm(mine, new Date(), this._timeZone());
 
     // «På» betyr at minst én alarm i rommet er aktiv. Å kreve at alle er på
     // ville gjort brytaren av i det vanlige tilfellet der ett av flere
@@ -305,6 +339,29 @@ class RoomDevice extends Homey.Device {
     const listing = numberedList(mine, language);
     if (this.getSettings().alarmList !== listing) {
       await this.setSettings({ alarmList: listing }).catch(() => {});
+    }
+
+    // Lydlista ble tidligere fylt bare ved oppstart, så en favoritt du
+    // stjernemerket etterpå manglet i nettopp den lista hintet ber deg kopiere
+    // fra. Kildene er bufret i appen, så dette koster ingenting mellom hentingene.
+    await this._refreshSourceList().catch((error) => this.error('Kunne ikke liste lydkilder', error));
+  }
+
+  // Sonen Homey står i. Feiler oppslaget, eller gir det noe annet enn en
+  // streng, faller vi tilbake på prosessens egen sone — samme oppførsel som før
+  // dette fantes. En manglende sone skal aldri stoppe oppdateringen av rommet.
+  _timeZone() {
+    try {
+      const zone = this.homey.clock.getTimezone();
+      if (typeof zone !== 'string' || !zone) return null;
+      // Intl kaster på et sonenavn den ikke kjenner, og det kastet ville
+      // avbrutt hele oppdateringen av rommet. Vi prøver den her, der en feil
+      // bare koster oss tidssonen.
+      Intl.DateTimeFormat(undefined, { timeZone: zone });
+      return zone;
+    } catch (error) {
+      this.error('Ubrukelig tidssone fra Homey — regner i prosessens egen', error);
+      return null;
     }
   }
 

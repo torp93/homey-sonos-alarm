@@ -23,8 +23,14 @@ class AlarmDriver extends Homey.Driver {
 
     session.setHandler('saveHost', async ({ host }) => {
       if (!isValidHost(host)) throw new Error(this.homey.__('error.badAddress'));
+
+      // Adressen prøves FØR den lagres. Ble den lagret først, sto en død IP
+      // igjen i innstillingene selv om testen feilet — og en lagret adresse
+      // slår ut oppdagelsen, så appen kunne aldri finne høyttaleren igjen på
+      // egen hånd.
+      const result = await this.homey.app.testSpeaker(host);
       await this.homey.settings.set(SETTING_HOST, String(host).trim());
-      return this.homey.app.testSpeaker(host);
+      return result;
     });
 
     // Logges i begge ender: et handler-kall som henger ser i visningen ut som
@@ -54,7 +60,7 @@ class AlarmDriver extends Homey.Driver {
         this.error('getRooms feilet', error);
         // Kastes videre som ren tekst: en feil som ikke serialiseres blir borte
         // på veien til visningen, og da henger kallet i stedet for å feile.
-        throw new Error(error.message || 'Kunne ikke hente rom');
+        throw new Error(error.message || this.homey.__('error.roomsFailed'));
       }
     });
 

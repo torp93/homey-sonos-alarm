@@ -38,10 +38,20 @@ module.exports = {
       const { findSource } = require('./lib/favorites');
       const sources = await homey.app.listSources();
       const source = findSource(sources, body.sourceId);
-      if (!source) throw new Error(`${homey.__('error.unknownSource')} ${body.sourceId}`);
-      changes.programURI = source.uri;
-      changes.programMetaData = source.metadata;
-      changes.playMode = source.radio || source.id === 'buzzer' ? 'NORMAL' : 'SHUFFLE';
+
+      if (source) {
+        changes.programURI = source.uri;
+        changes.programMetaData = source.metadata;
+        changes.playMode = source.radio || source.id === 'buzzer' ? 'NORMAL' : 'SHUFFLE';
+      } else if (body.sourceId !== body.currentSourceId) {
+        // Ukjent lyd som ikke er den alarmen alt spiller: da er det en reell
+        // feil, og vi skal ikke gjette.
+        throw new Error(`${homey.__('error.unknownSource')} ${body.sourceId}`);
+      }
+      // Ellers: alarmen spiller noe som ikke lenger står blant favorittene —
+      // en avstjernet spilleliste, eller noe valgt i Sonos-appen. Metadataen
+      // er tjenestebundet og kan ikke gjenskapes, så lydfeltene lates i fred
+      // og brukeren får endre tid, dager og volum uten å miste musikken.
     }
 
     await homey.app.applyChange(body.id, changes);

@@ -13,7 +13,11 @@
     "noRooms": "Fant ingen rom å legge alarmen i.",
     "noSourceList": "Kunne ikke hente lista over lyder.",
     "deleteFailed": "Kunne ikke slette alarmen:",
-    "partial": "Noen alarmer kunne ikke endres. Feilet:"
+    "partial": "Noen alarmer kunne ikke endres. Feilet:",
+    "partialDelete": "Noen alarmer kunne ikke slettes. Feilet:",
+    "roomsFailed": "Kunne ikke hente rommene fra Sonos.",
+    "roomEmpty": "Dette rommet har ingen alarmer å slå av eller på.",
+    "roomMissing": "Dette rommet svarer ikke på nettverket akkurat nå."
   },
   "source": {
     "chime": "Sonos-tone",
@@ -63,6 +67,8 @@
     "createFailed": "Kunne ikke lage alarmen: ",
     "createdButDeviceFailed": "Alarmen ble laget i Sonos, men enheten kunne ikke legges til: ",
     "addManually": "\nLegg den til via «Legg til en alarm som finnes».",
+
+    "chime": "Sonos-tone",
 
     "presetDaily": "Hver dag",
     "presetWeekdays": "Ukedager",

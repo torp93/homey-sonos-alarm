@@ -763,8 +763,8 @@
                 "no": "Bruk når du lagrer"
               },
               "hint": {
-                "en": "On by default. Saving adds the alarm to this room, or updates it if an alarm with the same time, days and sound is already there — so changing the volume edits that alarm instead of adding another. Turn this off to edit the values without touching Sonos.",
-                "no": "På som standard. Lagring legger alarmen til i dette rommet, eller oppdaterer den hvis en alarm med samme tid, dager og lyd allerede finnes — så en volumendring endrer den alarmen i stedet for å legge til en ny. Slå av for å endre verdiene uten å røre Sonos."
+                "en": "On by default. Saving adds the alarm to this room, or updates the alarm that is already set to the same time — Sonos allows only one alarm per time per room, so the days, sound and volume you set here replace that alarm’s. Turn this off to edit the values without touching Sonos.",
+                "no": "På som standard. Lagring legger alarmen til i dette rommet, eller oppdaterer den alarmen som allerede står på samme klokkeslett — Sonos tillater bare én alarm per tidspunkt per rom, så dagene, lyden og volumet du setter her erstatter dens. Slå av for å endre verdiene uten å røre Sonos."
               },
               "value": true
             },
@@ -886,6 +886,90 @@
                   "label": {
                     "en": "8",
                     "no": "8"
+                  }
+                },
+                {
+                  "id": "9",
+                  "label": {
+                    "en": "9",
+                    "no": "9"
+                  }
+                },
+                {
+                  "id": "10",
+                  "label": {
+                    "en": "10",
+                    "no": "10"
+                  }
+                },
+                {
+                  "id": "11",
+                  "label": {
+                    "en": "11",
+                    "no": "11"
+                  }
+                },
+                {
+                  "id": "12",
+                  "label": {
+                    "en": "12",
+                    "no": "12"
+                  }
+                },
+                {
+                  "id": "13",
+                  "label": {
+                    "en": "13",
+                    "no": "13"
+                  }
+                },
+                {
+                  "id": "14",
+                  "label": {
+                    "en": "14",
+                    "no": "14"
+                  }
+                },
+                {
+                  "id": "15",
+                  "label": {
+                    "en": "15",
+                    "no": "15"
+                  }
+                },
+                {
+                  "id": "16",
+                  "label": {
+                    "en": "16",
+                    "no": "16"
+                  }
+                },
+                {
+                  "id": "17",
+                  "label": {
+                    "en": "17",
+                    "no": "17"
+                  }
+                },
+                {
+                  "id": "18",
+                  "label": {
+                    "en": "18",
+                    "no": "18"
+                  }
+                },
+                {
+                  "id": "19",
+                  "label": {
+                    "en": "19",
+                    "no": "19"
+                  }
+                },
+                {
+                  "id": "20",
+                  "label": {
+                    "en": "20",
+                    "no": "20"
                   }
                 }
               ]

@@ -149,6 +149,7 @@
 function onHomeyReady(Homey) {
   var msgEl = document.getElementById('msg');
   var editingId = null;
+  var editingSourceId = null;
   var rooms = [];
   var sources = [];
 
@@ -353,17 +354,28 @@ function onHomeyReady(Homey) {
   function fillSources(selected) {
     var select = document.getElementById('f-source');
     select.innerHTML = '';
+    // Treffet må holdes rede på selv. Vi så tidligere etter «select.value» —
+    // men et nedtrekk med valg har ALLTID en verdi: finner nettleseren ingen
+    // som er merket valgt, velger den den første, og den første er alltid
+    // pipetonen. Sjekken var derfor alltid usann, blokken under var død kode,
+    // og en alarm som spilte noe utenfor favorittlista viste «Sonos-tone» —
+    // og ble skrevet om til pipetonen ved neste lagring. Metadataen som gikk
+    // tapt der kan ikke gjenskapes.
+    var matched = false;
     for (var i = 0; i < sources.length; i++) {
       var option = document.createElement('option');
       option.value = sources[i].id;
       option.textContent = sources[i].label || sources[i].title;
-      if (selected && sources[i].id === selected) option.selected = true;
+      if (selected && sources[i].id === selected) {
+        option.selected = true;
+        matched = true;
+      }
       select.appendChild(option);
     }
     // Alarmen kan spille noe som ikke lenger står blant favorittene — da er
     // valget hverken i lista eller mulig å gjenskape, så det vises som det er
     // framfor å bli stille byttet til den første i lista.
-    if (selected && !select.value) {
+    if (selected && !matched) {
       var current = document.createElement('option');
       current.value = selected;
       current.textContent = t('settings.music');
@@ -380,6 +392,10 @@ function onHomeyReady(Homey) {
 
   function openForm(alarm) {
     editingId = alarm ? alarm.id : null;
+    // Lyden alarmen hadde da skjemaet ble åpnet. Sendes med ved lagring slik at
+    // appen kan se at lyden ikke er endret, og la den stå urørt hvis den ikke
+    // lenger finnes blant favorittene.
+    editingSourceId = alarm ? alarm.sourceId : null;
     document.getElementById('formTitle').textContent =
       t(alarm ? 'settings.editAlarm' : 'settings.newAlarm');
     document.getElementById('remove').className = alarm ? 'action danger' : 'action danger hidden';
@@ -426,7 +442,8 @@ function onHomeyReady(Homey) {
         time: document.getElementById('f-time').value,
         recurrence: repeat,
         volume: Number(volumeEl.value),
-        sourceId: document.getElementById('f-source').value || undefined
+        sourceId: document.getElementById('f-source').value || undefined,
+        currentSourceId: editingSourceId || undefined
       }, done);
     } else {
       Homey.api('POST', '/createAlarm', {
@@ -442,12 +459,21 @@ function onHomeyReady(Homey) {
 
   document.getElementById('remove').addEventListener('click', function () {
     if (!editingId) return;
+    var button = this;
     // Sletting er ikke reversibel, og alarmen forsvinner også fra Sonos-appen.
-    if (!confirm(t('settings.deleteConfirm'))) return;
-    Homey.api('POST', '/deleteAlarm', { id: editingId }, function (error) {
-      if (error) { show(t('settings.deleteFailed') + error, 'bad'); return; }
-      view('list');
-      load();
+    // Homey.confirm, ikke nettleserens confirm: innstillingssiden lever inne i
+    // Homey-appen, og en innebygd dialog hører hjemme der.
+    Homey.confirm(t('settings.deleteConfirm'), function (confirmError, ok) {
+      if (confirmError || !ok) return;
+      // Knappen låses mens kallet går. Et nytt trykk ville sendt DestroyAlarm
+      // på nytt for en id som alt er borte.
+      button.disabled = true;
+      Homey.api('POST', '/deleteAlarm', { id: editingId }, function (error) {
+        button.disabled = false;
+        if (error) { show(t('settings.deleteFailed') + error, 'bad'); return; }
+        view('list');
+        load();
+      });
     });
   });
 
@@ -473,6 +499,13 @@ function onHomeyReady(Homey) {
   document.getElementById('c-save').addEventListener('click', function () {
     var host = document.getElementById('c-host').value.trim();
     var poll = Number(document.getElementById('c-poll').value) || 120;
+    // Tom betyr «finn en høyttaler selv» og er gyldig. En adresse som ikke er
+    // IPv4 blir derimot stille forkastet lenger inne, mens siden viste den som
+    // om den var i bruk — så den avvises her, slik paringen alt gjør.
+    if (host && !/^(\d{1,3}\.){3}\d{1,3}$/.test(host)) {
+      show(t('error.badAddress'), 'bad');
+      return;
+    }
     Homey.set('speakerHost', host, function (error) {
       if (error) { show(String(error), 'bad'); return; }
       Homey.set('pollSeconds', poll, function (secondError) {

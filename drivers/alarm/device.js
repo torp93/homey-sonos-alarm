@@ -3,6 +3,11 @@
 const Homey = require('homey');
 const { describeRecurrence } = require('../../lib/recurrence');
 const { normalizeTime } = require('../../lib/alarm-clock');
+const { roomName } = require('../../lib/zone-topology');
+
+// Hvor lenge et oppslått romnavn får stå. Rom bytter navn sjelden, men de gjør
+// det, og en time er kort nok til at endringen kommer av seg selv.
+const ROOM_NAME_MAX_AGE_MS = 60 * 60 * 1000;
 
 class AlarmDevice extends Homey.Device {
   async onInit() {
@@ -27,7 +32,20 @@ class AlarmDevice extends Homey.Device {
   }
 
   async onUninit() {
-    if (this._onAlarms) this.homey.app.alarms.off('alarms', this._onAlarms);
+    this._detach();
+  }
+
+  // onUninit dekker at appen stopper. Sletter brukeren enheten, er det
+  // onDeleted som kommer — og uten denne ble lytteren stående igjen og skrev
+  // til en enhet som ikke finnes lenger, så lenge appen kjørte.
+  async onDeleted() {
+    this._detach();
+  }
+
+  _detach() {
+    if (!this._onAlarms) return;
+    this.homey.app.alarms.off('alarms', this._onAlarms);
+    this._onAlarms = null;
   }
 
   async _apply(alarms) {
@@ -52,14 +70,23 @@ class AlarmDevice extends Homey.Device {
     await this._set('sonos_alarm_room', room);
   }
 
-  // Romnavnet krever et eget kall mot topologien, så det bufres. Rom bytter
-  // sjelden navn, og dette kjører ved hver polling.
+  // Romnavnet krever et oppslag i topologien, så det bufres. Rom bytter sjelden
+  // navn, og dette kjører ved hver polling.
+  //
+  // Bufferet har en levetid. Uten den ble navnet stående for alltid: en alarms
+  // RoomUUID endres aldri, så treffet var evig, og et rom du døpte om i
+  // Sonos-appen beholdt det gamle navnet til appen ble startet på nytt.
+  // Oppslaget går dessuten gjennom appens egen topologi-buffer i stedet for et
+  // eget kall per enhet.
   async _roomName(uuid) {
-    if (this._roomCache && this._roomCache.uuid === uuid) return this._roomCache.name;
+    const fresh = this._roomCache
+      && this._roomCache.uuid === uuid
+      && Date.now() - this._roomCache.at < ROOM_NAME_MAX_AGE_MS;
+    if (fresh) return this._roomCache.name;
+
     try {
-      const client = await this.homey.app.getClient();
-      const name = await client.roomName(uuid);
-      this._roomCache = { uuid, name };
+      const name = roomName(await this.homey.app.getTopology(), uuid);
+      this._roomCache = { uuid, name, at: Date.now() };
       return name;
     } catch (error) {
       this.error('Kunne ikke slå opp romnavn', error);

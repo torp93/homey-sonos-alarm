@@ -152,7 +152,7 @@
   sourceEl.innerHTML = '<option value="buzzer">' + t('loading') + '</option>';
   Homey.emit('getSources', null, function (error, list) {
     if (error || !list || list.length === 0) {
-      sourceEl.innerHTML = '<option value="buzzer">Sonos chime</option>';
+      sourceEl.innerHTML = '<option value="buzzer">' + t('chime') + '</option>';
       if (error) show(t('roomsFailed') + (error.message || error), 'bad');
       return;
     }

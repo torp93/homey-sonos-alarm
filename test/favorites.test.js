@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 const {
-  parseFavorites, listSources, findSource, findSourceByTitle, isRadio,
+  parseFavorites, parsePlaylists, listSources, findSource, findSourceByTitle, isRadio,
   serviceOf, describeSource,
 } = require('../lib/favorites');
 const { BUZZER_URI } = require('../lib/alarm-clock');
@@ -102,7 +102,76 @@ test('generiske merkelapper oversettes, egennavn står', () => {
 test('den innebygde tonen får ingen tjenestemerking', () => {
   const sources = allSources();
   assert.strictEqual(sources[0].service, '');
-  assert.strictEqual(describeSource(sources[0]), 'Sonos chime');
+  // Ingen parentes med tjeneste — den innebygde tonen kommer ikke fra noen.
+  assert.ok(!describeSource(sources[0]).includes('('));
+});
+
+test('tonen vises på brukerens språk, men slås opp på det faste navnet', () => {
+  // displayTitle er visningsnavnet; title er nøkkelen findSourceByTitle bruker
+  // og må være lik på alle språk, ellers ville en lagret innstilling sluttet å
+  // virke idet brukeren byttet språk.
+  const { listSources } = require('../lib/favorites');
+  const norwegian = listSources({ favoritesXml: '', playlistsXml: '' }, 'no')[0];
+  const english = listSources({ favoritesXml: '', playlistsXml: '' }, 'en')[0];
+
+  assert.strictEqual(norwegian.title, 'Sonos chime');
+  assert.strictEqual(english.title, 'Sonos chime');
+  assert.strictEqual(describeSource(norwegian, 'no'), 'Sonos-tone');
+  assert.strictEqual(describeSource(english, 'en'), 'Sonos chime');
+});
+
+// Escapingen ligger i to lag: DIDL-en er escapet inni <Result>, og tegnene i
+// selve DIDL-en er escapet der igjen. En favoritt som HETER «P4 Rock & Pop»
+// står derfor som «P4 Rock &amp;amp; Pop» i svaret fra høyttaleren.
+function browseResponse(inner) {
+  const escaped = inner
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return `<s:Envelope><s:Body><u:BrowseResponse><Result>${escaped}</Result>`
+    + '</u:BrowseResponse></s:Body></s:Envelope>';
+}
+
+test('ampersand i et favorittnavn kommer hele veien ut', () => {
+  // Navnet er nøkkelen kilden slås opp på. Uten dekodingen het favoritten
+  // «P4 Rock &amp; Pop» i hver liste, og å skrive det ekte navnet ga ingen treff.
+  const xml = browseResponse(
+    '<DIDL-Lite><item id="FV:2/1"><dc:title>P4 Rock &amp; Pop</dc:title>'
+    + '<res>x-sonosapi-stream:s1234?sid=254</res>'
+    + '<r:resMD>&lt;DIDL-Lite&gt;&lt;item&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</r:resMD>'
+    + '</item></DIDL-Lite>',
+  );
+
+  const [favorite] = parseFavorites(xml);
+  assert.strictEqual(favorite.title, 'P4 Rock & Pop');
+
+  const sources = listSources({ favoritesXml: xml, playlistsXml: '' }, 'en');
+  assert.strictEqual(findSourceByTitle(sources, 'P4 Rock & Pop').uri, 'x-sonosapi-stream:s1234?sid=254');
+  assert.strictEqual(describeSource(sources[1], 'en'), 'P4 Rock & Pop (radio)');
+});
+
+test('ampersand i et spillelistenavn dobbeltescapes ikke i metadataen', () => {
+  // playlistMetadata escaper tittelen på nytt. Uten dekodingen først ble
+  // «Chill & Relax» sendt til Sonos som «Chill &amp;amp; Relax».
+  const xml = browseResponse(
+    '<DIDL-Lite><container id="SQ:12"><dc:title>Chill &amp; Relax</dc:title>'
+    + '<res>file:///jffs/settings/savedqueues.rsq#12</res></container></DIDL-Lite>',
+  );
+
+  const [playlist] = parsePlaylists(xml);
+  assert.strictEqual(playlist.title, 'Chill & Relax');
+  assert.ok(playlist.metadata.includes('<dc:title>Chill &amp; Relax</dc:title>'));
+  assert.ok(!playlist.metadata.includes('&amp;amp;'));
+});
+
+test('en kilde kan slås opp både på id og på URI', () => {
+  // Innstillingssiden kjenner alarmens lyd som dens ProgramURI. For den
+  // innebygde tonen er den «x-rincon-buzzer:0», mens kildens id er «buzzer» —
+  // uten oppslag på URI feilet enhver lagring av en chime-alarm.
+  const sources = listSources({ favoritesXml: '', playlistsXml: '' }, 'en');
+
+  assert.strictEqual(findSource(sources, 'buzzer').id, 'buzzer');
+  assert.strictEqual(findSource(sources, 'x-rincon-buzzer:0').id, 'buzzer');
+  assert.strictEqual(findSource(sources, 'finnes-ikke'), null);
+  assert.strictEqual(findSource(sources, ''), null);
 });
 
 test('kategorien utledes av URI, ikke av Sonos-beskrivelsen', () => {

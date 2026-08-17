@@ -13,7 +13,11 @@
     "noRooms": "No rooms found to put the alarm in.",
     "noSourceList": "Could not fetch the list of sounds.",
     "deleteFailed": "Could not delete the alarm:",
-    "partial": "Some alarms could not be changed. Failed:"
+    "partial": "Some alarms could not be changed. Failed:",
+    "partialDelete": "Some alarms could not be deleted. Failed:",
+    "roomsFailed": "Could not fetch the rooms from Sonos.",
+    "roomEmpty": "This room has no alarms to switch.",
+    "roomMissing": "This room is not answering on the network right now."
   },
   "source": {
     "chime": "Sonos chime",
@@ -63,6 +67,8 @@
     "createFailed": "Could not create the alarm: ",
     "createdButDeviceFailed": "The alarm was created in Sonos, but the device could not be added: ",
     "addManually": "\nAdd it through \"Add an alarm that already exists\".",
+
+    "chime": "Sonos chime",
 
     "presetDaily": "Every day",
     "presetWeekdays": "Weekdays",
