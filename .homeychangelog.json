@@ -1,4 +1,8 @@
 {
+  "1.4.3": {
+    "en": "A room now leads with the alarm that rings next, not the earliest one on the clock. A one-off alarm no longer hides the weekly schedule behind the counter once it has already rung.",
+    "no": "Et rom viser nå den alarmen som ringer neste gang, ikke den tidligste på klokka. En engangsalarm skjuler ikke lenger ukeplanen bak telleren etter at den har ringt."
+  },
   "1.4.2": {
     "en": "A room now shows its earliest alarm and how many more it has, instead of a list that was cut off after the first one. The full list is in the device settings.",
     "no": "Et rom viser nå den tidligste alarmen og hvor mange flere det har, i stedet for en liste som ble kuttet etter den første. Hele lista står i enhetsinnstillingene."

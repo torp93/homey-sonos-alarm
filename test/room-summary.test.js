@@ -285,3 +285,31 @@ test('en ukjent tidssone faller tilbake i stedet for å kaste', () => {
   assert.strictEqual(formatTime(nextOccurrence(daily, PAST_MIDNIGHT, 'Bogus/Zone')), '07:00');
   assert.doesNotThrow(() => nextAlarm([daily], PAST_MIDNIGHT, 'Bogus/Zone'));
 });
+
+test('sammendraget leder med den som faktisk ringer neste gang', () => {
+  // Tidligste PA KLOKKA er feil regel. En engangsalarm kl. 06:00 ville toppet
+  // flisa og skjult hele ukeplanen bak «+4» — ogsa etter at den har ringt og
+  // Sonos har slatt den av.
+  const set = [
+    alarm({ id: 'engangs', startTime: '06:00:00', recurrence: 'ONCE' }),
+    alarm({ id: 'man1', startTime: '07:00:00', recurrence: 'ON_12345' }),
+    alarm({ id: 'man2', startTime: '07:30:00', recurrence: 'ON_12345' }),
+  ];
+
+  // Kl. 05:00 i Oslo er engangsalarmen faktisk den neste.
+  const tidlig = nextAlarm(set, new Date('2026-08-19T03:00:00Z'), OSLO);
+  assert.strictEqual(describeRoom(set, 'no', tidlig.alarm), '06:00 Én gang +2');
+
+  // Kl. 07:00 har den ringt, og ukedagsalarmen skal lede.
+  const senere = nextAlarm(set, new Date('2026-08-19T05:00:00Z'), OSLO);
+  assert.strictEqual(describeRoom(set, 'no', senere.alarm), '07:30 Ukedager +2');
+});
+
+test('uten noen aktiv alarm faller sammendraget tilbake pa den tidligste', () => {
+  const av = [
+    alarm({ id: 'a', startTime: '08:00:00', recurrence: 'DAILY', enabled: false }),
+    alarm({ id: 'b', startTime: '07:00:00', recurrence: 'ON_12345', enabled: false }),
+  ];
+  assert.strictEqual(nextAlarm(av, PAST_MIDNIGHT, OSLO), null);
+  assert.strictEqual(describeRoom(av, 'no', null), '07:00 Ukedager +1');
+});

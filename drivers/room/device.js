@@ -328,7 +328,7 @@ class RoomDevice extends Homey.Device {
     // tidspunkt står avslått.
     await this._set('onoff', mine.some((alarm) => alarm.enabled));
     await this._set('sonos_room_count', mine.length);
-    await this._set('sonos_room_summary', describeRoom(mine, language));
+    await this._set('sonos_room_summary', describeRoom(mine, language, next && next.alarm));
     await this._set('sonos_room_next', next
       ? formatTime(next.at)
       : (language === 'no' ? 'Ingen' : 'None'));
