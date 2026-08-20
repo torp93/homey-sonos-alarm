@@ -88,12 +88,29 @@ test('ugyldig tidspunkt gir null i stedet for å kaste', () => {
   assert.strictEqual(nextOccurrence(alarm({ startTime: '' }), WEDNESDAY), null);
 });
 
-test('oppsummeringen sorterer på tid og merker avslåtte', () => {
+test('oppsummeringen viser den tidligste og hvor mange flere som finnes', () => {
+  // Flisa paa romkortet viser rundt tjue tegn. Hele lista fikk aldri plass,
+  // uansett skilletegn — den staar i enhetsinnstillingene i stedet.
   const alarms = [
     alarm({ startTime: '10:00:00', recurrence: 'WEEKDAYS', enabled: false }),
     alarm({ startTime: '08:00:00', recurrence: 'DAILY', enabled: true }),
   ];
-  assert.strictEqual(describeRoom(alarms, 'no'), '08:00 Daglig\n10:00 Ukedager (av)');
+  assert.strictEqual(describeRoom(alarms, 'no'), '08:00 Daglig +1');
+});
+
+test('en enkelt alarm far ingen teller', () => {
+  assert.strictEqual(describeRoom([alarm({ startTime: '09:15:00', recurrence: 'ONCE' })], 'no'),
+    '09:15 Én gang');
+});
+
+test('sammendraget faar plass i flisa uansett hvor mange alarmer rommet har', () => {
+  // Fem ukedagsalarmer er det virkelige tilfellet fra soverommet.
+  const many = ['07:00', '07:30', '07:35', '07:45', '08:00']
+    .map((time) => alarm({ startTime: `${time}:00`, recurrence: 'ON_12345' }));
+
+  const label = describeRoom(many, 'no');
+  assert.strictEqual(label, '07:00 Ukedager +4');
+  assert.ok(label.length <= 20, `${label} er ${label.length} tegn`);
 });
 
 test('nummerert liste sorterer på tid og starter på 1', () => {

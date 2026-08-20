@@ -1,4 +1,8 @@
 {
+  "1.4.2": {
+    "en": "A room now shows its earliest alarm and how many more it has, instead of a list that was cut off after the first one. The full list is in the device settings.",
+    "no": "Et rom viser nå den tidligste alarmen og hvor mange flere det har, i stedet for en liste som ble kuttet etter den første. Hele lista står i enhetsinnstillingene."
+  },
   "1.4.1": {
     "en": "Repeat days are easier to read. Monday to Friday now says Weekdays instead of listing five days and getting cut off, the week starts on Monday, and runs of days are written as a range. A room now lists its alarms one per line instead of on a single long line.",
     "no": "Gjentakelsen er lettere å lese. Mandag til fredag sier nå Ukedager i stedet for å liste fem dager og bli kuttet, uka begynner på mandag, og dager på rad skrives som et spenn. Et rom lister nå alarmene sine på hver sin linje i stedet for på én lang linje."
