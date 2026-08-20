@@ -93,7 +93,7 @@ test('oppsummeringen sorterer på tid og merker avslåtte', () => {
     alarm({ startTime: '10:00:00', recurrence: 'WEEKDAYS', enabled: false }),
     alarm({ startTime: '08:00:00', recurrence: 'DAILY', enabled: true }),
   ];
-  assert.strictEqual(describeRoom(alarms, 'no'), '08:00 Daglig · 10:00 Ukedager (av)');
+  assert.strictEqual(describeRoom(alarms, 'no'), '08:00 Daglig\n10:00 Ukedager (av)');
 });
 
 test('nummerert liste sorterer på tid og starter på 1', () => {

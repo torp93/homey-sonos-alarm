@@ -1,4 +1,8 @@
 {
+  "1.4.1": {
+    "en": "Repeat days are easier to read. Monday to Friday now says Weekdays instead of listing five days and getting cut off, the week starts on Monday, and runs of days are written as a range. A room now lists its alarms one per line instead of on a single long line.",
+    "no": "Gjentakelsen er lettere å lese. Mandag til fredag sier nå Ukedager i stedet for å liste fem dager og bli kuttet, uka begynner på mandag, og dager på rad skrives som et spenn. Et rom lister nå alarmene sine på hver sin linje i stedet for på én lang linje."
+  },
   "1.4.0": {
     "en": "Editing an alarm in the app settings no longer replaces its music with the built-in chime. Favourites and playlists with an & in the name work again. Rooms you group together in the Sonos app keep their own alarms, so deleting the alarms in one room no longer touches the other. Next alarm now follows your Homey timezone. The app finds your speaker again by itself if its address changes.",
     "no": "Å endre en alarm i appinnstillingene bytter ikke lenger musikken til den innebygde tonen. Favoritter og spillelister med & i navnet virker igjen. Rom du grupperer sammen i Sonos-appen beholder sine egne alarmer, så å slette alarmene i ett rom rører ikke lenger det andre. Neste alarm følger nå tidssonen Homey står i. Appen finner høyttaleren igjen selv om adressen endrer seg."
