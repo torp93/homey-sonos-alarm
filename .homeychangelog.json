@@ -1,4 +1,8 @@
 {
+  "1.5.1": {
+    "en": "Deleting an alarm from Repair works: confirming the dialog did nothing before. Creating an alarm no longer closes the window, so you can add and remove several in one go.",
+    "no": "Å slette en alarm fra Reparer virker: å bekrefte dialogen gjorde ingenting før. Å lage en alarm lukker ikke lenger vinduet, så du kan legge til og fjerne flere i samme omgang."
+  },
   "1.5.0": {
     "en": "Deleting an alarm has moved to Repair on the room device, where every alarm is listed with its own delete button. The old position picker is gone: the settings label could only show two lines, so most of your alarms were invisible, and a position pointed at the wrong alarm as soon as another was deleted.",
     "no": "Sletting av en alarm er flyttet til Reparer på rom-enheten, der hver alarm står i lista med sin egen slett-knapp. Det gamle plassvalget er borte: etikettfeltet kunne bare vise to linjer, så de fleste alarmene var usynlige, og et plassnummer pekte på feil alarm så snart en annen ble slettet."

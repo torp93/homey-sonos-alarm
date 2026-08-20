@@ -231,16 +231,26 @@
       button.textContent = t('deleteOne');
       button.addEventListener('click', function () {
         // Sletting kan ikke angres, og alarmen forsvinner ogsa fra Sonos-appen.
-        Homey.confirm(t('confirmDelete') + ' ' + alarm.time + ' ' + alarm.when, function (err, ok) {
-          if (err || !ok) return;
-          button.disabled = true;
-          Homey.emit('deleteAlarm', { id: alarm.id }, function (error) {
+        //
+        // Homey.confirm i en pare-/reparasjonsvisning tar INGEN callback — den
+        // returnerer et lofte. Sendes en funksjon som andre argument, blir den
+        // lest som «icon» og aldri kalt, og et trykk pa Ja gjor ingenting.
+        // Innstillingssiden har motsatt signatur; de to API-ene er ikke like.
+        Homey.confirm(t('confirmDelete') + ' ' + alarm.time + ' ' + alarm.when, null)
+          .then(function (ok) {
+            if (!ok) return;
+            button.disabled = true;
+            return Homey.emit('deleteAlarm', { id: alarm.id })
+              .then(function () {
+                button.disabled = false;
+                show(t('deleted'), 'ok');
+                loadAlarms();
+              });
+          })
+          .catch(function (error) {
             button.disabled = false;
-            if (error) { show(t('deleteFailed') + (error.message || error), 'bad'); return; }
-            show(t('deleted'), 'ok');
-            loadAlarms();
+            show(t('deleteFailed') + (error && error.message ? error.message : error), 'bad');
           });
-        });
       });
 
       row.appendChild(grow);
@@ -250,10 +260,11 @@
   }
 
   function loadAlarms() {
-    Homey.emit('listAlarms', null, function (error, list) {
-      if (error) { show(t('listFailed') + (error.message || error), 'bad'); return; }
-      renderAlarms(list);
-    });
+    Homey.emit('listAlarms', null)
+      .then(renderAlarms)
+      .catch(function (error) {
+        show(t('listFailed') + (error && error.message ? error.message : error), 'bad');
+      });
   }
 
   loadAlarms();
@@ -274,9 +285,12 @@
       createBtn.disabled = false;
       if (error) { show(t('createFailed') + (error.message || error), 'bad'); return; }
       show(t('created'), 'ok');
-      // Homey.createDevice finnes ikke i en repair-visning — enheten er
-      // allerede lagt til. Vi avslutter bare sesjonen.
-      setTimeout(function () { Homey.done(); }, 900);
+      // Visningen blir staaende. Den lukket seg selv den gang den bare kunne
+      // lage en alarm og var ferdig — na lister den ogsaa alarmene og sletter
+      // dem, og da er det rart at du kastes ut av a lage en mens du kan slette
+      // fem pa rad. Lista hentes pa nytt sa den nye alarmen dukker opp med det
+      // samme. Lukk med krysset naar du er ferdig.
+      loadAlarms();
     });
   });
 })();
