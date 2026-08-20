@@ -3,6 +3,8 @@
 const Homey = require('homey');
 const { describeSource } = require('../../lib/favorites');
 const { normalizeTime } = require('../../lib/alarm-clock');
+const { describeRecurrence } = require('../../lib/recurrence');
+const { sortedByTime } = require('../../lib/room-summary');
 
 class RoomDriver extends Homey.Driver {
   // Ingen egen paringsvisning: rommene kommer fra topologien, og appen finner
@@ -38,6 +40,28 @@ class RoomDriver extends Homey.Driver {
         volume: Number(settings.newVolume),
         days,
       };
+    });
+
+    // Alarmene i rommet, ferdig formulert. Enhetsinnstillingene kan bare vise
+    // to linjer av en etikett, sa hele lista hoerer hjemme her — og her kan hver
+    // alarm ha sin egen knapp i stedet for et plassnummer som flytter seg naar
+    // noe slettes.
+    session.setHandler('listAlarms', async () => {
+      const language = this.homey.i18n.getLanguage();
+      const mine = await this.homey.app.alarmsInRoom(String(device.getData().id));
+
+      return sortedByTime(mine).map((alarm) => ({
+        id: alarm.id,
+        time: String(alarm.startTime || '').slice(0, 5),
+        when: describeRecurrence(alarm.recurrence, language),
+        enabled: alarm.enabled,
+      }));
+    });
+
+    session.setHandler('deleteAlarm', async ({ id }) => {
+      this.log('Sletter alarm ' + id + ' fra reparasjonsvisningen');
+      await this.homey.app.deleteAlarm(String(id));
+      return { ok: true };
     });
 
     session.setHandler('createAlarm', async (input) => {

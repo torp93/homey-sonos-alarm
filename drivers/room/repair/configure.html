@@ -36,6 +36,17 @@
               background: transparent; color: inherit; }
   .sa .buttons button.primary { background: #1f8fff; border-color: #1f8fff; color: #fff; }
   .sa button[disabled] { opacity: 0.5; cursor: default; }
+  .sa .existing { margin-top: 26px; border-top: 1px solid rgba(128,128,128,0.25); padding-top: 16px; }
+  .sa .existing h3 { margin: 0 0 8px; font-size: 0.85em; font-weight: 600; opacity: 0.75; }
+  .sa .row { display: flex; align-items: center; gap: 10px; padding: 9px 0;
+              border-bottom: 1px solid rgba(128,128,128,0.15); }
+  .sa .row:last-child { border-bottom: 0; }
+  .sa .row .grow { flex: 1; min-width: 0; font-size: 0.92em; }
+  .sa .row .off { opacity: 0.5; font-size: 0.82em; }
+  .sa .row button { flex: none; padding: 6px 12px; font-size: 0.82em; border-radius: 6px;
+              cursor: pointer; border: 1px solid rgba(192,57,43,0.6);
+              background: transparent; color: #c0392b; }
+  .sa .muted { opacity: 0.6; font-size: 0.88em; }
   .sa #result { margin-top: 16px; white-space: pre-wrap; font-size: 0.88em; }
   .sa #result.bad { color: #c0392b; }
   .sa #result.ok { color: #1a8a3c; }
@@ -71,6 +82,11 @@
 
   <div class="buttons">
     <button id="create" class="primary" type="button"></button>
+  </div>
+
+  <div class="existing">
+    <h3 id="existingLabel"></h3>
+    <div id="alarmList"><span class="muted" id="listLoading"></span></div>
   </div>
 </div>
 
@@ -176,6 +192,71 @@
     }
     if (template.days) applyPreset(template.days);
   });
+
+  // Lista over alarmene som allerede finnes. Hver rad far sin egen knapp — et
+  // plassnummer ville pekt pa feil alarm sa snart en annen ble slettet og
+  // resten rykket opp.
+  var listEl = document.getElementById('alarmList');
+  document.getElementById('existingLabel').textContent = t('existing');
+  document.getElementById('listLoading').textContent = t('loading');
+
+  function renderAlarms(list) {
+    listEl.textContent = '';
+
+    if (!list || list.length === 0) {
+      var empty = document.createElement('span');
+      empty.className = 'muted';
+      empty.textContent = t('noAlarms');
+      listEl.appendChild(empty);
+      return;
+    }
+
+    list.forEach(function (alarm) {
+      var row = document.createElement('div');
+      row.className = 'row';
+
+      var grow = document.createElement('div');
+      grow.className = 'grow';
+      // textContent, ikke innerHTML: navnene kommer fra Sonos.
+      grow.textContent = alarm.time + '  ' + alarm.when;
+      if (!alarm.enabled) {
+        var off = document.createElement('span');
+        off.className = 'off';
+        off.textContent = '  ' + t('isOff');
+        grow.appendChild(off);
+      }
+
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = t('deleteOne');
+      button.addEventListener('click', function () {
+        // Sletting kan ikke angres, og alarmen forsvinner ogsa fra Sonos-appen.
+        Homey.confirm(t('confirmDelete') + ' ' + alarm.time + ' ' + alarm.when, function (err, ok) {
+          if (err || !ok) return;
+          button.disabled = true;
+          Homey.emit('deleteAlarm', { id: alarm.id }, function (error) {
+            button.disabled = false;
+            if (error) { show(t('deleteFailed') + (error.message || error), 'bad'); return; }
+            show(t('deleted'), 'ok');
+            loadAlarms();
+          });
+        });
+      });
+
+      row.appendChild(grow);
+      row.appendChild(button);
+      listEl.appendChild(row);
+    });
+  }
+
+  function loadAlarms() {
+    Homey.emit('listAlarms', null, function (error, list) {
+      if (error) { show(t('listFailed') + (error.message || error), 'bad'); return; }
+      renderAlarms(list);
+    });
+  }
+
+  loadAlarms();
 
   createBtn.addEventListener('click', function () {
     var repeat = recurrence();

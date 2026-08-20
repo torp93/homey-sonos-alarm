@@ -39,14 +39,12 @@
     "enterAddress": "Enter an address, or search again.",
     "connecting": "Connecting …",
     "noContact": "Could not connect: ",
-
     "chooseTitle": "Add alarm",
     "chooseIntro": "What would you like to do?",
     "chooseExisting": "Add an alarm that already exists",
     "chooseExistingHint": "The alarms you have already set up in the Sonos app",
     "chooseNew": "Create a new alarm",
     "chooseNewHint": "With any sound from your Sonos favourites",
-
     "newTitle": "New alarm",
     "room": "Room",
     "sound": "Sound",
@@ -67,13 +65,10 @@
     "createFailed": "Could not create the alarm: ",
     "createdButDeviceFailed": "The alarm was created in Sonos, but the device could not be added: ",
     "addManually": "\nAdd it through \"Add an alarm that already exists\".",
-
     "chime": "Sonos chime",
-
     "presetDaily": "Every day",
     "presetWeekdays": "Weekdays",
     "presetWeekends": "Weekends",
-
     "mon": "Mon",
     "tue": "Tue",
     "wed": "Wed",
@@ -81,8 +76,15 @@
     "fri": "Fri",
     "sat": "Sat",
     "sun": "Sun",
-
-    "scriptError": "Error in the pairing window: "
+    "scriptError": "Error in the pairing window: ",
+    "existing": "Alarms in this room",
+    "noAlarms": "No alarms in this room yet.",
+    "deleteOne": "Delete",
+    "confirmDelete": "Delete this alarm? It is removed from Sonos too:",
+    "deleted": "The alarm has been deleted.",
+    "deleteFailed": "Could not delete the alarm: ",
+    "listFailed": "Could not fetch the alarms: ",
+    "isOff": "(off)"
   },
   "settings": {
     "alarms": "Alarms",

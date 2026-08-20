@@ -39,14 +39,12 @@
     "enterAddress": "Skriv inn en adresse, eller søk på nytt.",
     "connecting": "Kobler til …",
     "noContact": "Fikk ikke kontakt: ",
-
     "chooseTitle": "Legg til alarm",
     "chooseIntro": "Hva vil du gjøre?",
     "chooseExisting": "Legg til en alarm som finnes",
     "chooseExistingHint": "Alarmene du allerede har satt opp i Sonos-appen",
     "chooseNew": "Lag en ny alarm",
     "chooseNewHint": "Med hvilken som helst lyd fra Sonos-favorittene dine",
-
     "newTitle": "Ny alarm",
     "room": "Rom",
     "sound": "Lyd",
@@ -67,13 +65,10 @@
     "createFailed": "Kunne ikke lage alarmen: ",
     "createdButDeviceFailed": "Alarmen ble laget i Sonos, men enheten kunne ikke legges til: ",
     "addManually": "\nLegg den til via «Legg til en alarm som finnes».",
-
     "chime": "Sonos-tone",
-
     "presetDaily": "Hver dag",
     "presetWeekdays": "Ukedager",
     "presetWeekends": "Helg",
-
     "mon": "man",
     "tue": "tir",
     "wed": "ons",
@@ -81,8 +76,15 @@
     "fri": "fre",
     "sat": "lør",
     "sun": "søn",
-
-    "scriptError": "Feil i paringsvinduet: "
+    "scriptError": "Feil i paringsvinduet: ",
+    "existing": "Alarmer i dette rommet",
+    "noAlarms": "Ingen alarmer i dette rommet ennå.",
+    "deleteOne": "Slett",
+    "confirmDelete": "Slette denne alarmen? Den fjernes også fra Sonos:",
+    "deleted": "Alarmen er slettet.",
+    "deleteFailed": "Kunne ikke slette alarmen: ",
+    "listFailed": "Kunne ikke hente alarmene: ",
+    "isOff": "(av)"
   },
   "settings": {
     "alarms": "Alarmer",

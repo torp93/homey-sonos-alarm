@@ -1,4 +1,8 @@
 {
+  "1.5.0": {
+    "en": "Deleting an alarm has moved to Repair on the room device, where every alarm is listed with its own delete button. The old position picker is gone: the settings label could only show two lines, so most of your alarms were invisible, and a position pointed at the wrong alarm as soon as another was deleted.",
+    "no": "Sletting av en alarm er flyttet til Reparer på rom-enheten, der hver alarm står i lista med sin egen slett-knapp. Det gamle plassvalget er borte: etikettfeltet kunne bare vise to linjer, så de fleste alarmene var usynlige, og et plassnummer pekte på feil alarm så snart en annen ble slettet."
+  },
   "1.4.3": {
     "en": "A room now leads with the alarm that rings next, not the earliest one on the clock. A one-off alarm no longer hides the weekly schedule behind the counter once it has already rung.",
     "no": "Et rom viser nå den alarmen som ringer neste gang, ikke den tidligste på klokka. En engangsalarm skjuler ikke lenger ukeplanen bak telleren etter at den har ringt."

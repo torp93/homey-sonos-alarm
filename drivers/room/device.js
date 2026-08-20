@@ -2,7 +2,7 @@
 
 const Homey = require('homey');
 const {
-  alarmsForRoom, nextAlarm, describeRoom, formatTime, numberedList, alarmAtPosition,
+  alarmsForRoom, nextAlarm, describeRoom, formatTime,
 } = require('../../lib/room-summary');
 const { normalizeTime, findEquivalentAlarm, BUZZER_URI } = require('../../lib/alarm-clock');
 const { daysToRecurrence, daysForPreset } = require('../../lib/recurrence');
@@ -54,13 +54,12 @@ class RoomDevice extends Homey.Device {
 
   async onSettings({ newSettings, changedKeys }) {
     this.log('Innstillinger lagret, endret:', changedKeys.join(', '));
-    const deleting = newSettings.deletePosition && newSettings.deletePosition !== 'none';
-    if (newSettings.applyOnSave === false && !deleting) return;
+    if (newSettings.applyOnSave === false) return;
 
     // Bare endringer i selve alarmen skal utløse noe. Uten dette ville en
     // endring av en helt urelatert innstilling skrevet til Sonos.
     const relevant = [
-      'newTime', 'newSource', 'newVolume', 'applyOnSave', 'deletePosition', 'daysPreset',
+      'newTime', 'newSource', 'newVolume', 'applyOnSave', 'daysPreset',
       'newMonday', 'newTuesday', 'newWednesday', 'newThursday',
       'newFriday', 'newSaturday', 'newSunday',
     ];
@@ -95,43 +94,19 @@ class RoomDevice extends Homey.Device {
   }
 
   async _applySettings(settings) {
-    const deleting = settings.deletePosition && settings.deletePosition !== 'none';
-
-    // Før alt annet, så både opprettelse og visning bruker de nye dagene.
+    // Sletting skjer ikke lenger herfra. Enhetsinnstillinger kan bare vise to
+    // linjer av en etikett, sa lista over alarmer ble kuttet — og et plassnummer
+    // pekte uansett pa feil alarm sa snart en annen ble slettet og resten rykket
+    // opp. Reparer-visningen har hele lista og en knapp per alarm.
     if (settings.daysPreset && settings.daysPreset !== 'custom') {
       await this._applyDaysPreset(settings.daysPreset).catch((error) =>
         this.error('Kunne ikke bruke hurtigvalget', error));
     }
 
-    if (deleting) {
-      // Valget nullstilles FØR slettingen forsøkes, ikke etter. Feilet
-      // slettingen og valget ble stående, ville neste lagring — selv bare en
-      // volumendring — slettet alarmen som da står på den plassen. Sletting
-      // kan ikke angres, så et etterlatt valg er den farligste tilstanden
-      // enheten kan ha.
-      await this.setSettings({ deletePosition: 'none', applyOnSave: false }).catch(() => {});
-
-      try {
-        await this._deleteSelection(settings.deletePosition);
-      } catch (error) {
-        this.error('Sletting feilet', error);
-        await this.setWarning(`${this.homey.__('error.deleteFailed')} ${error.message}`)
-          .catch(() => {});
-        return;
-      }
-
-      // Slettingen er gjort, og «bruk når du lagrer» slås på igjen. Ble den
-      // stående av, gjorde neste lagring stille ingenting — brukeren endret
-      // tidspunktet, trykket lagre, og ingen alarm ble laget.
-      await this.setSettings({ applyOnSave: true }).catch(() => {});
-      await this.unsetWarning().catch(() => {});
-      return;
-    }
-
     if (settings.applyOnSave === false) return;
 
-    // Feil fra en lagring skjer etter at Homey har svart «lagret», så uten en
-    // advarsel på enheten ville brukeren sett suksess og ingen alarm.
+    // Feil fra en lagring skjer etter at Homey har svart «lagret», sa uten en
+    // advarsel pa enheten ville brukeren sett suksess og ingen alarm.
     try {
       await this._createFromSettings();
       await this.unsetWarning().catch(() => {});
@@ -140,34 +115,6 @@ class RoomDevice extends Homey.Device {
       await this.setWarning(error.message).catch(() => {});
     }
   }
-
-  async _deleteSelection(selection) {
-    const resolve = await this.homey.app.roomResolver();
-    const client = await this.homey.app.getClient();
-    // Lista leses på nytt her, ikke fra det etiketten viste. Er en alarm
-    // slettet i mellomtiden, peker plassen på noe annet.
-    const mine = alarmsForRoom(await client.listAlarms(), resolve, this.roomUUID);
-
-    if (selection === 'all') {
-      if (mine.length === 0) {
-        this.log('Ingen alarmer i rommet — sletter ingenting');
-        return;
-      }
-      this.log(`Sletter alle ${mine.length} alarm(er) i rommet`);
-      await this.homey.app.deleteAlarms(mine, this.getName());
-      return;
-    }
-
-    const target = alarmAtPosition(mine, selection);
-    if (!target) {
-      this.error(`Plass ${selection} finnes ikke blant ${mine.length} alarm(er) — sletter ingenting`);
-      return;
-    }
-
-    this.log(`Sletter alarm ${target.id} (${target.startTime}) fra plass ${selection}`);
-    await this.homey.app.deleteAlarm(target.id);
-  }
-
   async onUninit() {
     this._detach();
   }
@@ -192,7 +139,6 @@ class RoomDevice extends Homey.Device {
     const defaults = {
       applyOnSave: true,
       daysPreset: 'custom',
-      deletePosition: 'none',
       newTime: '07:00',
       newSource: 'Sonos chime',
       newVolume: 30,
@@ -218,18 +164,27 @@ class RoomDevice extends Homey.Device {
     await this.setSettings(missing);
   }
 
-  // Etiketten fylles ved kjøring, så den viser BRUKERENS egne lyder.
-  // Nedtrekk i enhetsinnstillinger kan ikke fylles slik — derfor er
-  // lydfeltet et tekstfelt med navneoppslag, ikke en fast liste.
+  // Navnene pa lydene du kan skrive inn i «Lyd»-feltet over.
+  //
+  // Kompakt og med et antall bakerst, fordi Homey viser bare TO LINJER av et
+  // etikettfelt: med en linje per lyd sto det to av ni, og de sju andre fantes
+  // ikke for den som leste. Tjenestemerkingen «(radio)» er droppet her — den
+  // stjeler plass uten a hore med i navnet du skal skrive.
   async _refreshSourceList() {
     const sources = await this.homey.app.listSources();
     const language = this.homey.i18n.getLanguage();
-    const names = sources.map((source) => describeSource(source, language)).join('\n');
-    if (this.getSettings().availableSources !== names) {
-      await this.setSettings({ availableSources: names });
+
+    const names = sources.map((source) => source.displayTitle || source.title);
+    // Antallet star FORST. Star det bakerst, er det nettopp det som klippes
+    // bort — og da ser lista komplett ut selv om den ikke er det.
+    const count = language === 'no' ? `${names.length} lyder:` : `${names.length} sounds:`;
+    const listing = `${count} ${names.join(', ')}`;
+
+    if (this.getSettings().availableSources !== listing) {
+      await this.setSettings({ availableSources: listing })
+        .catch((error) => this.error('Kunne ikke oppdatere lydlista', error));
     }
   }
-
   async _createFromSettings() {
     const settings = this.getSettings();
     this.log('Opprett alarm, innstillinger:', JSON.stringify(settings));
@@ -336,11 +291,6 @@ class RoomDevice extends Homey.Device {
     // Etiketten oppdateres ved hver polling, så numrene i nedtrekket alltid
     // svarer til noe som faktisk finnes. Etiketter kan settes ved kjøring —
     // nedtrekk kan ikke, og det er hele grunnen til at det er nummer og ikke navn.
-    const listing = numberedList(mine, language);
-    if (this.getSettings().alarmList !== listing) {
-      await this.setSettings({ alarmList: listing }).catch(() => {});
-    }
-
     // Lydlista ble tidligere fylt bare ved oppstart, så en favoritt du
     // stjernemerket etterpå manglet i nettopp den lista hintet ber deg kopiere
     // fra. Kildene er bufret i appen, så dette koster ingenting mellom hentingene.
